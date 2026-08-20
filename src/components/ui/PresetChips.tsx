@@ -26,7 +26,7 @@ export function PresetChips(props: PresetChipsProps) {
             return (
               <button
                 type="button"
-                class="rounded border border-ink/15 px-3 py-2 text-left text-sm hover:border-accent dark:border-paper/20"
+                class="focus-ring rounded border border-ink/15 px-3 py-2 text-left text-sm hover:border-accent dark:border-paper/20"
                 aria-label={`${preset().name}, ${subtitle()}`}
                 onClick={() => props.onApply(preset().chainring, preset().cog)}
               >

@@ -13,7 +13,7 @@ export function Tooltip(props: TooltipProps) {
     <span class="relative inline-block">
       <button
         type="button"
-        class="grid h-6 w-6 place-items-center rounded-full border border-ink/25 text-xs leading-none dark:border-paper/30"
+        class="focus-ring grid h-6 w-6 place-items-center rounded-full border border-ink/25 text-xs leading-none dark:border-paper/30"
         aria-label="About this metric"
         aria-expanded={open() ? "true" : "false"}
         aria-describedby={open() ? props.id : undefined}

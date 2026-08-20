@@ -27,14 +27,14 @@ export function ChainPanel(props: ChainPanelProps) {
         </h2>
         <Tooltip id="chain-length">{CHAIN_TIP}</Tooltip>
       </div>
-      <p class="mt-1 font-mono text-3xl tabular-nums" aria-live="polite">
+      <p class="mt-1 font-mono text-3xl tabular-nums">
         {`${chain().evenLinks} links`}
       </p>
       <p class="mt-1 text-sm opacity-70">
         {`${chain().oddLinks} with a half-link`}
       </p>
       <Show when={chain().halfLinkCloser}>
-        <p class="mt-2 flex items-start gap-1 text-sm text-accent">
+        <p class="mt-2 flex items-start gap-1 text-sm text-accent-ink dark:text-accent">
           <span aria-hidden="true">⚠</span>
           <span>{HALF_LINK_WARNING}</span>
         </p>
