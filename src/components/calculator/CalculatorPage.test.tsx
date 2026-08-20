@@ -74,8 +74,9 @@ describe("CalculatorPage", () => {
     const { getByRole } = renderCalculator();
     fireEvent.click(getByRole("radio", { name: "Imperial" }));
     flush();
-    expect(liveText()).toContain("gear inches");
-    expect(liveText()).not.toContain("meters");
+    expect(liveText()).toBe(
+      "Gear ratio 2.71, 71.6 gear inches, 17 skid patches",
+    );
   });
 
   it("says patch singular when there is one", () => {
