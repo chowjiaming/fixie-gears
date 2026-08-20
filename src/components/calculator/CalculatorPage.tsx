@@ -1,8 +1,10 @@
 import { useNavigate, useSearch } from "@tanstack/solid-router";
-import { createMemo, For } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
+import { ChainPanel } from "~/components/calculator/ChainPanel";
 import { SkidSuggestions } from "~/components/skid/SkidSuggestions";
 import { SkidVisualizer } from "~/components/skid/SkidVisualizer";
 import { CadenceTable } from "~/components/ui/CadenceTable";
+import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { MetricCard } from "~/components/ui/MetricCard";
 import { PresetChips } from "~/components/ui/PresetChips";
 import { ToothInput } from "~/components/ui/ToothInput";
@@ -12,10 +14,15 @@ import {
   formatGearInches,
   formatRatio,
 } from "~/lib/format";
-import { ALLOWED_CRANKS_MM, snapCrankMm } from "~/lib/gear/calculations";
+import {
+  ALLOWED_CRANKS_MM,
+  clampInt,
+  snapCrankMm,
+} from "~/lib/gear/calculations";
+import { STAY_DEFAULT_MM, STAY_MAX_MM, STAY_MIN_MM } from "~/lib/gear/chain";
 import type { WheelSizeId } from "~/lib/gear/types";
 import { parseWheelSize, WHEEL_SIZES } from "~/lib/gear/wheels";
-import type { CalculatorSearch } from "~/lib/search";
+import { applySearchPatch, type CalculatorSearch } from "~/lib/search";
 import { prefs } from "~/lib/state/prefs-store";
 import { useCurrentSetup } from "~/lib/state/setup-store";
 
@@ -32,13 +39,17 @@ const GAIN_TIP =
 const SKID_TIP =
   "Distinct tire spots that hit the ground when you lock the cranks to skid. Count is cog ÷ gcd(ring, cog); doubled only when ambidextrous and the chainring has an odd tooth count. Two or fewer patches wear a tire out quickly.";
 
+function tapedCircTip(n: number): string {
+  return `Using a taped circumference of ${n} mm. Clear the field to return to bead-seat plus twice the tire width.`;
+}
+
 export function CalculatorPage() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
 
   const patch = (partial: Partial<CalculatorSearch>) => {
     void navigate({
-      search: (prev) => ({ ...prev, ...partial }),
+      search: (prev) => applySearchPatch(prev, partial),
       replace: true,
     });
   };
@@ -52,22 +63,23 @@ export function CalculatorView(props: {
 }) {
   const { config, metrics } = useCurrentSetup(() => props.search);
   const metricHero = createMemo(() => prefs.units === "metric");
+  const circTip = createMemo(() => {
+    const n = props.search.circ;
+    return n !== undefined ? tapedCircTip(n) : undefined;
+  });
 
   return (
     <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
-      <div class="lg:hidden">
+      <aside>
         <details
-          class="rounded-lg border border-ink/10 p-3 dark:border-paper/15"
+          class="setup-inputs rounded-lg border border-ink/10 p-3 dark:border-paper/15 lg:border-0 lg:p-0"
           open
         >
-          <summary class="cursor-pointer font-medium">Inputs</summary>
-          <div class="mt-4">
+          <summary class="cursor-pointer font-medium lg:hidden">Inputs</summary>
+          <div class="mt-4 lg:mt-0">
             <SetupInputs bike={props.search} onPatch={props.onPatch} />
           </div>
         </details>
-      </div>
-      <aside class="hidden lg:block">
-        <SetupInputs bike={props.search} onPatch={props.onPatch} />
       </aside>
 
       <section class="flex flex-col gap-8">
@@ -84,7 +96,9 @@ export function CalculatorView(props: {
                 ? formatDevelopment(metrics().developmentMeters)
                 : formatGearInches(metrics().gearInches)
             }
-            tooltip={metricHero() ? DEVELOPMENT_TIP : GEAR_INCHES_TIP}
+            tooltip={
+              circTip() ?? (metricHero() ? DEVELOPMENT_TIP : GEAR_INCHES_TIP)
+            }
           />
           <MetricCard
             label={metricHero() ? "Gear inches" : "Development"}
@@ -93,12 +107,14 @@ export function CalculatorView(props: {
                 ? formatGearInches(metrics().gearInches)
                 : formatDevelopment(metrics().developmentMeters)
             }
-            tooltip={metricHero() ? GEAR_INCHES_TIP : DEVELOPMENT_TIP}
+            tooltip={
+              circTip() ?? (metricHero() ? GEAR_INCHES_TIP : DEVELOPMENT_TIP)
+            }
           />
           <MetricCard
             label="Gain ratio"
             value={formatGain(metrics().gainRatio)}
-            tooltip={GAIN_TIP}
+            tooltip={circTip() ?? GAIN_TIP}
           />
           <MetricCard
             label="Skid patches"
@@ -127,6 +143,12 @@ export function CalculatorView(props: {
             />
           </div>
         </div>
+
+        <ChainPanel
+          stay={props.search.stay}
+          ring={props.search.chainring}
+          cog={props.search.cog}
+        />
       </section>
     </div>
   );
@@ -140,6 +162,7 @@ function SetupInputs(props: {
     beadSeatDiameterMm: WHEEL_SIZES[props.bike.wheel].bsdMm,
     tireWidthMm: props.bike.tire,
   }));
+  const imperial = createMemo(() => prefs.units === "imperial");
 
   return (
     <div class="flex flex-col gap-5">
@@ -180,6 +203,11 @@ function SetupInputs(props: {
         unit="mm"
         onChange={(tire) => props.onPatch({ tire })}
       />
+      <CircumferenceInput
+        label="Measured circumference"
+        value={props.bike.circ}
+        onChange={(circ) => props.onPatch({ circ })}
+      />
       <label class="flex flex-col gap-1 text-sm">
         Crank length
         <select
@@ -195,6 +223,38 @@ function SetupInputs(props: {
           </For>
         </select>
       </label>
+      <Show
+        when={imperial()}
+        fallback={
+          <ToothInput
+            label="Chainstay"
+            value={props.bike.stay}
+            min={STAY_MIN_MM}
+            max={STAY_MAX_MM}
+            unit="mm"
+            onChange={(stay) => props.onPatch({ stay })}
+          />
+        }
+      >
+        <ToothInput
+          label="Chainstay"
+          value={Number((props.bike.stay / 25.4).toFixed(1))}
+          min={13.8}
+          max={17.7}
+          step={0.1}
+          unit="in"
+          onChange={(inches) =>
+            props.onPatch({
+              stay: clampInt(
+                inches * 25.4,
+                STAY_MIN_MM,
+                STAY_MAX_MM,
+                STAY_DEFAULT_MM,
+              ),
+            })
+          }
+        />
+      </Show>
       <label class="flex items-center gap-2 text-sm">
         <input
           type="checkbox"

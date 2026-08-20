@@ -3,8 +3,9 @@ import { render as solidRender } from "@solidjs/web";
 import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { flush } from "solid-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SavedView } from "~/components/saved/SavedPage";
-import { parseCalculatorSearch } from "~/lib/search";
+import { keepCurrentStay, SavedView } from "~/components/saved/SavedPage";
+import { STAY_DEFAULT_MM } from "~/lib/gear/chain";
+import { fromConfig, parseCalculatorSearch, toConfig } from "~/lib/search";
 import {
   reloadSavedFromStorage,
   SAVED_STORAGE_KEY,
@@ -102,5 +103,40 @@ describe("SavedPage", () => {
     flush();
 
     expect(loaded).toEqual([parseCalculatorSearch({ chainring: 48, cog: 16 })]);
+  });
+
+  it("keepCurrentStay overlays the live stay onto a fromConfig bike", () => {
+    const fromSaved = fromConfig(
+      toConfig(parseCalculatorSearch({ chainring: 48, cog: 16 })),
+    );
+    expect(fromSaved.stay).toBe(STAY_DEFAULT_MM);
+    expect(keepCurrentStay(fromSaved, 405).stay).toBe(405);
+  });
+
+  it("keeps stay 405 when loading a saved bike whose fromConfig stay is 410", () => {
+    const loaded: Array<ReturnType<typeof parseCalculatorSearch>> = [];
+    const current = parseCalculatorSearch({
+      chainring: 48,
+      cog: 16,
+      stay: 405,
+    });
+    const { getByLabelText, getByRole } = renderSaved(current, (bike) => {
+      loaded.push(keepCurrentStay(bike, current.stay));
+    });
+
+    fireEvent.input(getByLabelText("Name for current setup"), {
+      target: { value: "Street" },
+    });
+    flush();
+    fireEvent.click(getByRole("button", { name: "Save current" }));
+    flush();
+    fireEvent.click(getByRole("button", { name: "Load Street" }));
+    flush();
+
+    expect(fromConfig(toConfig(current)).stay).toBe(STAY_DEFAULT_MM);
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0]?.stay).toBe(405);
+    expect(loaded[0]?.chainring).toBe(48);
+    expect(loaded[0]?.cog).toBe(16);
   });
 });

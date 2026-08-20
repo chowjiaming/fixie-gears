@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js";
+import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { ToothInput } from "~/components/ui/ToothInput";
 import { ALLOWED_CRANKS_MM, snapCrankMm } from "~/lib/gear/calculations";
 import type { WheelSizeId } from "~/lib/gear/types";
@@ -76,6 +77,12 @@ export function CompareColumnHeader(props: CompareColumnHeaderProps) {
         max={50}
         unit="mm"
         onChange={(tire) => props.onChange({ tire })}
+      />
+      <CircumferenceInput
+        compact
+        label="Circ"
+        value={props.bike.circ}
+        onChange={(circ) => props.onChange({ circ })}
       />
       <label class="flex flex-col gap-1 text-sm">
         Crank

@@ -2,8 +2,8 @@
 
 All functions in `src/lib/gear/` are **pure, total, and unit-tested**. No
 framework imports allowed in this directory. A reference implementation is
-seeded in `docs/08-seed-code.md` — copy it verbatim (it already matches this
-document).
+seeded in `docs/08-seed-code.md` — copy it verbatim for the v1 core, then
+extend with `chain.ts` and optional circumference as described here.
 
 ## Core types
 
@@ -14,6 +14,7 @@ export type WheelSizeId = "700c" | "650b" | "26in";
 export interface WheelSpec {
   beadSeatDiameterMm: number; // 622 (700c/29"), 584 (650b), 559 (26")
   tireWidthMm: number; // 18–50
+  circumferenceMm?: number; // 1800–2500 integer mm when taped
 }
 
 export interface DrivetrainConfig {
@@ -45,12 +46,18 @@ export interface SpeedRow {
 `rolloutMeters` is kept on the type so track-racing copy can say “aka
 rollout” in the development tooltip. It is **not** a sixth metric card.
 
+**Stay is not on `DrivetrainConfig`.** Chainstay lives only in URL search
+(`stay`) and feeds `chainLength(stayMm, ring, cog)` in `lib/gear/chain.ts`.
+Chain results are not fields on `DerivedMetrics`.
+
 ## Formulas
 
 Let `R = chainringTeeth / cogTeeth`, `D` = wheel diameter, `C` = wheel
 circumference.
 
 ### Wheel diameter
+
+Default approximation (no taped circ):
 
 ```text
 D_mm = beadSeatDiameterMm + 2 × tireWidthMm
@@ -60,9 +67,17 @@ C_m  = π × D_mm / 1000
 
 Example: 700×25c → 622 + 50 = 672 mm ≈ 26.46 in.
 
-This is the common calculator approximation; a taped tire is typically
-smaller. Say so in the diameter / development tooltip. No measured-
-circumference override in v1.
+When `circumferenceMm` is a valid integer in `[1800, 2500]`:
+
+```text
+C_m  = circumferenceMm / 1000
+D_mm = circumferenceMm / π
+```
+
+Development, gear inches, speed, and gain ratio follow. Skid patches ignore
+circumference. Unparsable or out-of-range values fall back to the BSD
+approximation. Say so in the diameter / development tooltip when unset;
+when set, note the taped value and that clearing returns to BSD+2×width.
 
 ### Gear metrics
 
@@ -87,6 +102,42 @@ speedMph = speedKmh / 1.609344
 Standard cadence rows: 40, 60, 70, 80, 90, 100, 110, 120, 140 rpm.
 Highlight the row nearest 90 rpm (common cruising cadence). The table shows
 **one** speed column, following the units toggle (km/h or mph).
+
+### Chain length (`lib/gear/chain.ts`)
+
+Stay is URL-only (350–450 mm, default 410). Pure functions of
+`(stayMm, ring, cog)`:
+
+```text
+stay_in = stayMm / 25.4
+L_in    = 2 × stay_in + (ring + cog) / 4 + 0.5
+raw     = L_in / 0.5
+```
+
+```ts
+export interface ChainLength {
+  rawLinks: number;
+  evenLinks: number;
+  oddLinks: number;
+  halfLinkCloser: boolean;
+}
+
+export function nearestEvenLinks(raw: number): number;
+export function nearestOddLinks(raw: number): number;
+export function chainLength(
+  stayMm: number,
+  ring: number,
+  cog: number,
+): ChainLength;
+```
+
+Parity rounding: `Math.round(raw)`; if the parity is wrong, pick the
+neighbor closer to `raw`; **tie → lower**. `halfLinkCloser` is
+`|raw − odd| < |raw − even|` (strict). Exact midpoint does not warn.
+
+UI shows `evenLinks` as the buy number and `oddLinks` as the half-link
+option. Warning follows `halfLinkCloser`. Seed: 46/17 at 410 mm stay →
+even 98, odd 97, warning on.
 
 ### Skid patches
 
@@ -150,17 +201,19 @@ URL params outside the allowed set are clamped or snapped, never thrown.
 - cogTeeth: integer 9–30 (`clampInt`, default 17)
 - tireWidthMm: integer 18–50 (`clampInt`, default 25)
 - crankLengthMm: snap to `{165, 167.5, 170, 172.5, 175}` (`snapCrankMm`,
-  default 170). Ties (equal distance to two allowed values) resolve toward
-  170.
+  default 170). Ties (equal distance to two allowed values) resolve toward 170.
 - wheel: `"700c" | "650b" | "26in"`; anything else (including legacy
   `"650c"`) → `"700c"`
 - ambi: `1` or anything else → `0`
+- stay: integer 350–450 mm (`clampInt`, default 410); not on config
+- circ: optional integer 1800–2500 mm; missing / garbage / out of range →
+  property **absent**
 
 ## Common presets (ship as data)
 
 Named **ring/cog chips**. Applying a preset writes `chainring` and `cog`
-only; wheel, tire, crank, and ambi stay put. Chip subtitle is gear inches
-on the **current** wheel. Do not claim a gear-inch in the name.
+only; wheel, tire, crank, stay, circ, and ambi stay put. Chip subtitle is
+gear inches on the **current** wheel. Do not claim a gear-inch in the name.
 
 ```ts
 export const PRESETS = [

@@ -203,6 +203,8 @@ export function HeatmapGrid(props: HeatmapGridProps) {
       tire: props.bike.tire,
       crank: props.bike.crank,
       ambi: props.bike.ambi,
+      stay: props.bike.stay,
+      ...(props.bike.circ !== undefined ? { circ: props.bike.circ } : {}),
     }),
   );
 

@@ -10,8 +10,9 @@ plus visualizations that build intuition.
 
 ## Audience
 
-**v1 primary job:** street fixie at the shop — pick a ratio, see skid patches,
-share the setup.
+**Primary job:** street fixie at the shop — pick a ratio, see skid patches,
+share the setup. Chain length and a taped tire measurement help at the
+counter.
 
 Track racers and curious commuters are welcome; they get the same calculator
 plus named ring/cog presets. They do **not** get a second “track mode,” a
@@ -29,18 +30,20 @@ gear-inch target, or “best gear” highlighting.
 2. **URL as source of truth.** The drivetrain configuration lives in the URL
    search string on **every** route, so the current bike survives navigation
    and every view is shareable by link.
-3. **Local computation.** All math runs in the browser. No backend in v1.
-   Do not advertise “offline-first” in the UI or README until a PWA exists
-   (v2).
+3. **Local computation.** All math runs in the browser. No backend in this
+   build. Do not advertise “offline-first” in the UI or README until a PWA
+   exists.
 4. **Teach, don't just tell.** Tooltips and inline explanations for every
    metric (many riders don't know what gain ratio or development means).
 5. **Mobile-first.** Riders use this at the bike shop and the velodrome.
 
 ## Scope
 
-### v1 (this build)
+### v2 (this build)
 
 - Gear calculator (chainring, cog, wheel size, tire width, crank length)
+- Optional measured (taped) tire circumference override
+- Chainstay length (URL-only) → chain link count panel
 - Derived metrics: ratio, gear inches, meters of development, gain ratio,
   skid patches, speed-at-cadence table
 - Skid patch calculator + radial visualizer
@@ -49,11 +52,9 @@ gear-inch target, or “best gear” highlighting.
 - Saved setups (localStorage), shareable URLs
 - Metric/imperial unit toggle, dark mode
 
-### v2 (deferred, design for extensibility)
+### Deferred (design for extensibility)
 
-- Chain length calculator (chainstay length input)
 - Gear range warnings (chain tension, ratio legality for track events)
-- Measured tire circumference override
 - 650c wheel size, free-form crank millimetres, gear-inch target
 - PWA install + offline manifest
 - User accounts / cloud sync (would justify TanStack Start server functions)
@@ -63,4 +64,4 @@ gear-inch target, or “best gear” highlighting.
 - Geared/derailleur drivetrains (internally geared hubs maybe later)
 - Power/speed physics modeling (wind, grade, rider weight)
 - E-commerce or parts databases
-- Claiming the site works without a network in v1
+- Claiming the site works without a network until a PWA ships

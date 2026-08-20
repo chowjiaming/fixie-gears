@@ -15,7 +15,7 @@
 
 Five unique cards. Hero vs secondary length follows the units toggle
 (metric: development hero, gear inches secondary; imperial: the reverse).
-No rollout card.
+No rollout card. No chain metric card — chain is a separate panel.
 
 ```text
 ┌─────────────────────────────────────────┐
@@ -25,21 +25,25 @@ No rollout card.
 │ chainring    │ ratio · hero · secondary │
 │ cog          │ gain · skid              │
 │ wheel/tire   ├──────────────────────────┤
-│ crank        │ SPEED @ CADENCE TABLE    │
-│ ambi toggle  ├──────────────────────────┤
-│ presets      │ SKID PATCH VISUALIZER    │
-│              │ + Improve this           │
+│ circ (opt.)  │ SPEED @ CADENCE TABLE    │
+│ crank        ├──────────────────────────┤
+│ stay         │ SKID PATCH VISUALIZER    │
+│ ambi toggle  │ + Improve this           │
+│ presets      ├──────────────────────────┤
+│              │ CHAIN PANEL              │
+│              │ even links · half-link   │
 └──────────────┴──────────────────────────┘
 ```
 
 Mobile: single column — inputs collapse into a native `<details>` disclosure,
-metrics and visualizer stack below.
+metrics, visualizer, and chain panel stack below.
 
 ### `/compare`
 
 Horizontal scroll on mobile; sticky first column (metric names). Each
-setup column has a **compact header** (steppers + selects, no sliders)
-above the metric rows. Delta badges vs column 1.
+setup column has a **compact header** (steppers + selects, no sliders;
+circ after tire; no stay) above the metric rows. Delta badges vs column 1.
+No chain row.
 
 ### `/explore`
 
@@ -53,25 +57,26 @@ All built on native HTML elements styled with Tailwind (ADR-001). Each
 wrapper in `src/components/ui/` exposes a stable props API so a future
 headless-library migration touches only wrapper internals.
 
-| Component | Purpose | Notes |
-| --- | --- | --- |
-| `ToothInput` | slider + stepper combo | native `input[type=range]` + `input[type=number]`; reuse for tire width |
-| `MetricCard` | value + label + tooltip | tabular-nums, `aria-live="polite"` on value |
-| `Tooltip` | "?" popover | button + panel, `aria-describedby` |
-| `CadenceTable` | speed rows | 9 rows, highlight 90 rpm, one speed column |
-| `SkidVisualizer` | SVG donut + patches | pure SVG, `role="img"` + `aria-label`; two colors only for two foot-sets |
-| `SkidSuggestions` | ranked improvement list | applies on click; panel stays if empty |
-| `CompareTable` | N-column metric table | delta vs col 1; best highlight on skid only |
-| `CompareColumnHeader` | compact config editors | steppers + selects; no sliders |
-| `HeatmapGrid` | CSS grid of cells | color scale centered on current setup |
-| `PresetChips` | ring/cog presets | subtitle = gear inches on current wheel |
-| `UnitToggle`, `ThemeToggle` | prefs | in header |
-| `CopyLinkButton` | clipboard share | copies `location.href`; success feedback |
+| Component                   | Purpose                 | Notes                                                                            |
+| --------------------------- | ----------------------- | -------------------------------------------------------------------------------- |
+| `ToothInput`                | slider + stepper combo  | native `input[type=range]` + `input[type=number]`; reuse for tire width and stay |
+| `MetricCard`                | value + label + tooltip | tabular-nums, `aria-live="polite"` on value                                      |
+| `Tooltip`                   | "?" popover             | button + panel, `aria-describedby`                                               |
+| `CadenceTable`              | speed rows              | 9 rows, highlight 90 rpm, one speed column                                       |
+| `SkidVisualizer`            | SVG donut + patches     | pure SVG, `role="img"` + `aria-label`; two colors only for two foot-sets         |
+| `SkidSuggestions`           | ranked improvement list | applies on click; panel stays if empty                                           |
+| `ChainPanel`                | even/odd link counts    | below skid; warning when `halfLinkCloser`                                        |
+| `CompareTable`              | N-column metric table   | delta vs col 1; best highlight on skid only                                      |
+| `CompareColumnHeader`       | compact config editors  | steppers + selects; circ; no stay; no sliders                                    |
+| `HeatmapGrid`               | CSS grid of cells       | color scale centered on current setup                                            |
+| `PresetChips`               | ring/cog presets        | subtitle = gear inches on current wheel                                          |
+| `UnitToggle`, `ThemeToggle` | prefs                   | in header                                                                        |
+| `CopyLinkButton`            | clipboard share         | copies `location.href`; success feedback                                         |
 
 ## Accessibility
 
 - Native elements give keyboard + semantics for free; add `aria-label` to
-  every input.
+  every input (`Measured circumference`, `Chainstay`, etc.).
 - Heatmap cells are real `<button>`s with `aria-label` like
   "48 tooth chainring, 16 tooth cog, 77.8 gear inches".
 - Skid visualizer has a text alternative: "17 skid patches, evenly spaced."

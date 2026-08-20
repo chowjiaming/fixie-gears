@@ -167,4 +167,31 @@ describe("saved-store", () => {
       "savedAt",
     ]);
   });
+
+  it("round-trips optional circumferenceMm and drops invalid circ", () => {
+    const taped = toConfig(parseCalculatorSearch({ circ: 2130 }));
+    saveSetup("Taped", taped);
+    reloadSavedFromStorage();
+    expect(saved.setups[0]?.config.wheel.circumferenceMm).toBe(2130);
+    expect(JSON.stringify(exportSaved())).not.toMatch(/"stay"/);
+
+    const result = importSaved({
+      v: 1,
+      setups: [
+        {
+          id: "keep",
+          name: "Bad circ",
+          savedAt: "2026-08-20T12:00:00.000Z",
+          config: {
+            ...SAMPLE,
+            wheel: { ...SAMPLE.wheel, circumferenceMm: 1000 },
+          },
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    expect(
+      saved.setups.find((s) => s.id === "keep")?.config.wheel.circumferenceMm,
+    ).toBeUndefined();
+  });
 });

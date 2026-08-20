@@ -7,6 +7,7 @@ import {
   STANDARD_CADENCES,
   snapCrankMm,
 } from "./calculations";
+import { CIRC_MAX_MM, CIRC_MIN_MM } from "./chain";
 import {
   GOOD_SKID_PATCHES,
   gcd,
@@ -55,6 +56,27 @@ describe("wheels", () => {
     expect(parseWheelSize("650c")).toBe("700c");
     expect(parseWheelSize("nope")).toBe("700c");
   });
+
+  it("uses taped circumference at min and max boundaries", () => {
+    const minWheel = { ...wheel700x25, circumferenceMm: CIRC_MIN_MM };
+    const maxWheel = { ...wheel700x25, circumferenceMm: CIRC_MAX_MM };
+
+    expect(wheelDiameterMm(minWheel)).toBeCloseTo(CIRC_MIN_MM / Math.PI, 5);
+    expect(wheelDiameterMm(maxWheel)).toBeCloseTo(CIRC_MAX_MM / Math.PI, 5);
+    expect(wheelCircumferenceM(minWheel)).toBeCloseTo(CIRC_MIN_MM / 1000, 5);
+    expect(wheelCircumferenceM(maxWheel)).toBeCloseTo(CIRC_MAX_MM / 1000, 5);
+  });
+
+  it("falls back to bead seat + tire for invalid taped circumference", () => {
+    const fallbackDiameter = wheelDiameterMm(wheel700x25);
+    const fallbackCircumference = wheelCircumferenceM(wheel700x25);
+
+    for (const circumferenceMm of [2130.5, CIRC_MIN_MM - 1, CIRC_MAX_MM + 1]) {
+      const wheel = { ...wheel700x25, circumferenceMm };
+      expect(wheelDiameterMm(wheel)).toBe(fallbackDiameter);
+      expect(wheelCircumferenceM(wheel)).toBeCloseTo(fallbackCircumference, 4);
+    }
+  });
 });
 
 describe("derived metrics", () => {
@@ -73,6 +95,19 @@ describe("derived metrics", () => {
     const row90 = m.speeds.find((r) => r.cadenceRpm === 90);
     expect(row90?.speedKmh).toBeCloseTo(30.85, 2);
     expect(row90?.speedMph).toBeCloseTo(19.17, 2);
+  });
+
+  it("uses taped circumference when set", () => {
+    const taped = {
+      ...street,
+      wheel: { ...wheel700x25, circumferenceMm: 2130 },
+    };
+    const unset = deriveMetrics(street);
+    const set = deriveMetrics(taped);
+    expect(set.developmentMeters).toBeCloseTo((46 / 17) * 2.13, 5);
+    expect(set.wheelDiameterMm).toBeCloseTo(2130 / Math.PI, 5);
+    expect(set.skidPatches).toBe(unset.skidPatches);
+    expect(set.developmentMeters).not.toBeCloseTo(unset.developmentMeters, 5);
   });
 
   it("emits one speed row per standard cadence", () => {

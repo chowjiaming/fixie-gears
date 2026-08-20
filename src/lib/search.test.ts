@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  applySearchPatch,
   buildCompareColumns,
   compactCompareExtras,
   extrasAfterAdd,
   extrasAfterRemove,
+  formatCompareTuple,
   fromConfig,
   parseCalculatorSearch,
   parseCompareTuple,
@@ -22,7 +24,9 @@ describe("parseCalculatorSearch", () => {
       tire: 25,
       crank: 170,
       ambi: 0,
+      stay: 410,
     });
+    expect(parseCalculatorSearch({})).not.toHaveProperty("circ");
   });
 
   it("keeps half-mm cranks and maps 650c to 700c", () => {
@@ -40,6 +44,40 @@ describe("parseCalculatorSearch", () => {
     expect(s.tire).toBe(28);
     expect(s.crank).toBe(167.5);
     expect(s.ambi).toBe(1);
+  });
+
+  it("clamps stay and omits invalid circ", () => {
+    expect(parseCalculatorSearch({ stay: 300 }).stay).toBe(350);
+    expect(parseCalculatorSearch({ stay: 500 }).stay).toBe(450);
+    expect(parseCalculatorSearch({ circ: 1000 })).not.toHaveProperty("circ");
+    expect(parseCalculatorSearch({ circ: "foo" })).not.toHaveProperty("circ");
+    expect(parseCalculatorSearch({ circ: 2130 }).circ).toBe(2130);
+  });
+});
+
+describe("compare tuples with circ", () => {
+  it("parses a 7-part compare tuple and rejects other lengths", () => {
+    const seven = parseCompareTuple("48,16,700c,25,167.5,0,2130");
+    expect(seven?.wheel.circumferenceMm).toBe(2130);
+    expect(parseCompareTuple("48,16,700c,25,170")).toBeUndefined();
+    const six = parseCompareTuple("48,16,700c,25,167.5,0");
+    expect(six?.wheel.circumferenceMm).toBeUndefined();
+  });
+
+  it("formats six fields without circ and seven with", () => {
+    const bike = parseCalculatorSearch({});
+    expect(formatCompareTuple(toConfig(bike))).toBe("46,17,700c,25,170,0");
+    const taped = parseCalculatorSearch({ circ: 2130 });
+    expect(formatCompareTuple(toConfig(taped))).toBe(
+      "46,17,700c,25,170,0,2130",
+    );
+  });
+
+  it("applySearchPatch deletes circ when set to undefined", () => {
+    const prev = parseCalculatorSearch({ circ: 2130, stay: 420 });
+    const next = applySearchPatch(prev, { circ: undefined });
+    expect(next).not.toHaveProperty("circ");
+    expect(next.stay).toBe(420);
   });
 });
 
