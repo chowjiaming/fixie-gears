@@ -4,6 +4,8 @@ import {
   Outlet,
   useSearch,
 } from "@tanstack/solid-router";
+import { ThemeToggle } from "~/components/ui/ThemeToggle";
+import { UnitToggle } from "~/components/ui/UnitToggle";
 import {
   parseCalculatorSearch,
   parseExploreSearch,
@@ -25,25 +27,46 @@ function RootLayout() {
 
   return (
     <>
-      <header class="flex items-center gap-6 border-b px-4 py-3">
-        <span class="font-semibold">Fixie Gears</span>
-        <nav class="flex gap-4">
-          <Link to="/" search={bike}>
+      <header class="flex flex-wrap items-center gap-4 border-b border-ink/10 px-4 py-3 dark:border-paper/15">
+        <span class="font-semibold tracking-tight">Fixie Gears</span>
+        <nav class="flex flex-wrap gap-4">
+          <Link
+            to="/"
+            search={bike}
+            class="hover:text-accent"
+            activeProps={{ class: "text-accent" }}
+          >
             Calculator
           </Link>
-          <Link to="/compare" search={bike}>
+          <Link
+            to="/compare"
+            search={bike}
+            class="hover:text-accent"
+            activeProps={{ class: "text-accent" }}
+          >
             Compare
           </Link>
           <Link
             to="/explore"
             search={() => ({ ...bike(), ...parseExploreSearch(raw()) })}
+            class="hover:text-accent"
+            activeProps={{ class: "text-accent" }}
           >
             Explore
           </Link>
-          <Link to="/saved" search={bike}>
+          <Link
+            to="/saved"
+            search={bike}
+            class="hover:text-accent"
+            activeProps={{ class: "text-accent" }}
+          >
             Saved
           </Link>
         </nav>
+        <div class="ml-auto flex flex-wrap items-center gap-3">
+          <UnitToggle />
+          <ThemeToggle />
+        </div>
       </header>
       <main class="p-4">
         <Outlet />
