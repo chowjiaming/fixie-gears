@@ -8,6 +8,7 @@ import { CopyLinkButton } from "~/components/ui/CopyLinkButton";
 import { ThemeToggle } from "~/components/ui/ThemeToggle";
 import { UnitToggle } from "~/components/ui/UnitToggle";
 import {
+  compactCompareExtras,
   parseCalculatorSearch,
   parseExploreSearch,
   type CalculatorSearch,
@@ -41,7 +42,17 @@ function RootLayout() {
           </Link>
           <Link
             to="/compare"
-            search={bike}
+            search={() => {
+              const rec = raw();
+              return {
+                ...bike(),
+                ...compactCompareExtras({
+                  c2: typeof rec.c2 === "string" ? rec.c2 : undefined,
+                  c3: typeof rec.c3 === "string" ? rec.c3 : undefined,
+                  c4: typeof rec.c4 === "string" ? rec.c4 : undefined,
+                }),
+              };
+            }}
             class="hover:text-accent"
             activeProps={{ class: "text-accent" }}
           >
