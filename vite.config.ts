@@ -3,26 +3,137 @@ import { fileURLToPath, URL } from "node:url";
 import solid from "@solidjs/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import type { PluginOption } from "vite";
+import type { Plugin, PluginOption } from "vite";
 import { defineConfig } from "vite";
+import { type VitePluginPWAAPI, VitePWA } from "vite-plugin-pwa";
+import {
+  SITE_ACCENT,
+  SITE_DESCRIPTION,
+  SITE_MANIFEST_ID,
+  SITE_PAPER,
+  SITE_TITLE,
+} from "./src/lib/site";
+
+const srcDir = fileURLToPath(new URL("./src", import.meta.url));
+
+/**
+ * Solid Start writes `dist/client/index.html` in `solid:start/prerender`
+ * (`buildApp`, order `post`) after `vite-plugin-pwa` already ran
+ * `generateSW` on `closeBundle`. Regenerate so the shell is precached.
+ */
+function regeneratePwaSwAfterPrerender(): Plugin {
+  return {
+    name: "fixie-gears:regenerate-pwa-sw",
+    apply: "build",
+    enforce: "post",
+    buildApp: {
+      order: "post",
+      async handler(builder) {
+        const pwaPlugin = builder.config.plugins.find(
+          (plugin) => plugin.name === "vite-plugin-pwa",
+        );
+        const api = pwaPlugin?.api as VitePluginPWAAPI | undefined;
+        if (!api || api.disabled) return;
+        await api.generateSW();
+      },
+    },
+  };
+}
+
+const pwaPlugins: PluginOption[] = process.env.VITEST
+  ? []
+  : [
+      tanstackRouter({
+        target: "solid",
+        autoCodeSplitting: true,
+        routeFileIgnorePattern: "\\.test\\.",
+      }),
+      VitePWA({
+        strategies: "generateSW",
+        registerType: "autoUpdate",
+        injectRegister: false,
+        // Solid Start client assets land here; pin so post-prerender
+        // generateSW does not follow a drifted viteConfig.build.outDir.
+        outDir: "dist/client",
+        filename: "sw.js",
+        manifestFilename: "manifest.webmanifest",
+        includeAssets: [
+          "favicon.ico",
+          "favicon.svg",
+          "apple-touch-icon.png",
+          "pwa-192.png",
+          "pwa-512.png",
+          "pwa-192-maskable.png",
+          "pwa-512-maskable.png",
+          "og.png",
+          "robots.txt",
+          "sitemap.xml",
+        ],
+        manifest: {
+          id: SITE_MANIFEST_ID,
+          name: SITE_TITLE,
+          short_name: SITE_TITLE,
+          description: SITE_DESCRIPTION,
+          lang: "en",
+          start_url: "/",
+          scope: "/",
+          display: "standalone",
+          background_color: SITE_PAPER,
+          theme_color: SITE_ACCENT,
+          icons: [
+            {
+              src: "/pwa-192.png",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "any",
+            },
+            {
+              src: "/pwa-512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any",
+            },
+            {
+              src: "/pwa-192-maskable.png",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "maskable",
+            },
+            {
+              src: "/pwa-512-maskable.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
+          ],
+        },
+        workbox: {
+          navigateFallback: "index.html",
+          cleanupOutdatedCaches: true,
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,xml,txt}"],
+        },
+        devOptions: { enabled: false },
+      }),
+    ];
 
 export default defineConfig({
   plugins: [
-    ...(process.env.VITEST
-      ? []
-      : [
-          tanstackRouter({
-            target: "solid",
-            autoCodeSplitting: true,
-            routeFileIgnorePattern: "\\.test\\.",
-          }),
-        ]),
+    ...pwaPlugins,
     solid({ start: true }),
+    // enforce post + buildApp post: after solid:start/prerender writes index.html
+    ...(process.env.VITEST ? [] : [regeneratePwaSwAfterPrerender()]),
     tailwindcss(),
   ] satisfies PluginOption[],
   resolve: {
     alias: {
-      "~": fileURLToPath(new URL("./src", import.meta.url)),
+      "~": srcDir,
+      ...(process.env.VITEST
+        ? {
+            "virtual:pwa-register": fileURLToPath(
+              new URL("./src/pwa-register.stub.ts", import.meta.url),
+            ),
+          }
+        : {}),
     },
   },
   server: {

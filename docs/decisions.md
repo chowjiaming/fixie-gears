@@ -37,8 +37,10 @@ Netlify, static site.
   (no 404 hack or hash history), no repo-name basepath, deploy previews,
   and a functions upgrade path if accounts/sync land later.
 
-This build is local computation, not a PWA. Do not describe the site as
-offline-first in the UI or README until an installable manifest exists.
+Installable PWA via `vite-plugin-pwa` Workbox `generateSW`. After the
+first successful visit, the app shell (`/`, `/compare`, `/explore`,
+`/saved`) works offline. Do not describe the product as offline-first,
+and do not claim it works without ever having had a network.
 
 ## TanStack version pins (ADR-004)
 

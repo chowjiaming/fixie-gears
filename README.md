@@ -16,6 +16,7 @@ every setup is shareable.
 - Metric / imperial and light / dark
 
 All math runs in the browser. There is no backend.
+After the first visit, the app shell works offline.
 
 ## Develop
 

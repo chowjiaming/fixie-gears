@@ -5,3 +5,7 @@ allowBuilds:
 # Match npm's "latest version in range" so RC and next tags are not
 # delayed by pnpm's default release-age gate.
 minimumReleaseAge: 0
+# vite-plugin-pwa's virtual:pwa-register imports workbox-window; Rolldown
+# resolves that from the project root, not the plugin's nested node_modules.
+publicHoistPattern:
+  - "*workbox*"
