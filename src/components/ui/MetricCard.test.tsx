@@ -3,8 +3,6 @@ import { render as solidRender } from "@solidjs/web";
 import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { flush } from "solid-js";
 import { afterEach, describe, expect, it } from "vitest";
-import { deriveMetrics } from "~/lib/gear/calculations";
-import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import { MetricCard } from "./MetricCard";
 
 let dispose: (() => void) | undefined;
@@ -45,22 +43,30 @@ describe("MetricCard", () => {
     );
   });
 
-  it("shows a warning for 48/16", () => {
-    const metrics = deriveMetrics(
-      toConfig(parseCalculatorSearch({ chainring: 48, cog: 16 })),
-    );
-    expect(metrics.skidPatches).toBe(1);
-
+  it("shows the caller's warning text", () => {
     const { getByText } = renderUi(() => (
       <MetricCard
         label="Skid patches"
-        value={String(metrics.skidPatches)}
+        value="1"
         tooltip="skid patch count"
-        warning={metrics.skidPatches <= 2}
+        warning="Few skid patches — tire wear will concentrate."
       />
     ));
-
-    expect(getByText("1")).toBeTruthy();
     expect(getByText(/few skid patches/i)).toBeTruthy();
+  });
+
+  it("no longer announces its own value", () => {
+    const { getByText } = renderUi(() => (
+      <MetricCard label="Gear ratio" value="3.00" tooltip="t" />
+    ));
+    expect(getByText("3.00").getAttribute("aria-live")).toBeNull();
+  });
+
+  it("stays silent when no warning is given", () => {
+    const { queryByText } = renderUi(() => (
+      <MetricCard label="Gear ratio" value="3.00" tooltip="t" />
+    ));
+    expect(queryByText(/tire wear/i)).toBeNull();
+    expect(queryByText("⚠")).toBeNull();
   });
 });

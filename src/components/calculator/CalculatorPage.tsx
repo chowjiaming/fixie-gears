@@ -120,7 +120,11 @@ export function CalculatorView(props: {
             label="Skid patches"
             value={String(metrics().skidPatches)}
             tooltip={SKID_TIP}
-            warning={metrics().skidPatches <= 2}
+            warning={
+              metrics().skidPatches <= 2
+                ? "Few skid patches — tire wear will concentrate."
+                : undefined
+            }
           />
         </div>
 
