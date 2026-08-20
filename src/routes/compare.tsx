@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/solid-router";
+import { ComparePage } from "~/components/compare/ComparePage";
 import {
   parseCalculatorSearch,
   seedCompareExtras,
@@ -20,7 +21,3 @@ export const Route = createFileRoute("/compare")({
   },
   component: ComparePage,
 });
-
-function ComparePage() {
-  return <h1>Compare</h1>;
-}

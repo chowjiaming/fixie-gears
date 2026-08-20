@@ -1,3 +1,5 @@
+import { Show } from "solid-js";
+
 export interface ToothInputProps {
   label: string;
   value: number;
@@ -6,6 +8,7 @@ export interface ToothInputProps {
   step?: number;
   unit?: string;
   onChange: (value: number) => void;
+  compact?: boolean;
 }
 
 export function ToothInput(props: ToothInputProps) {
@@ -22,22 +25,29 @@ export function ToothInput(props: ToothInputProps) {
     <div class="flex flex-col gap-1">
       <div class="flex items-baseline justify-between gap-2">
         <span class="text-sm">{props.label}</span>
-        <span class="tabular-nums text-sm opacity-70">
-          {props.value}
-          {props.unit ? ` ${props.unit}` : ""}
-        </span>
+        <Show when={!props.compact}>
+          <span class="tabular-nums text-sm opacity-70">
+            {props.value}
+            {props.unit ? ` ${props.unit}` : ""}
+          </span>
+        </Show>
+        <Show when={props.compact && props.unit}>
+          <span class="text-sm opacity-70">{props.unit}</span>
+        </Show>
       </div>
       <div class="flex items-center gap-2">
-        <input
-          type="range"
-          min={props.min}
-          max={props.max}
-          step={props.step ?? 1}
-          value={props.value}
-          aria-label={props.label}
-          class="min-w-0 flex-1 accent-accent"
-          onInput={(e) => commit(e.currentTarget.value)}
-        />
+        <Show when={!props.compact}>
+          <input
+            type="range"
+            min={props.min}
+            max={props.max}
+            step={props.step ?? 1}
+            value={props.value}
+            aria-label={props.label}
+            class="min-w-0 flex-1 accent-accent"
+            onInput={(e) => commit(e.currentTarget.value)}
+          />
+        </Show>
         <input
           type="number"
           min={props.min}
@@ -45,7 +55,10 @@ export function ToothInput(props: ToothInputProps) {
           step={props.step ?? 1}
           value={props.value}
           aria-label={`${props.label} value`}
-          class="w-16 rounded border border-ink/20 bg-transparent px-2 py-1 text-right tabular-nums dark:border-paper/20"
+          class={[
+            "rounded border border-ink/20 bg-transparent px-2 py-1 text-right tabular-nums dark:border-paper/20",
+            props.compact ? "w-full" : "w-16",
+          ]}
           onInput={(e) => commit(e.currentTarget.value)}
         />
       </div>

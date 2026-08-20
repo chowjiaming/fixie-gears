@@ -37,6 +37,15 @@ export function parseCalculatorSearch(
   };
 }
 
+export type CompareSlot = "c1" | "c2" | "c3" | "c4";
+export type CompareExtraSlot = "c2" | "c3" | "c4";
+
+export interface CompareColumn {
+  slot: CompareSlot;
+  bike: CalculatorSearch;
+  removable: boolean;
+}
+
 export function toConfig(search: CalculatorSearch): DrivetrainConfig {
   return {
     chainringTeeth: search.chainring,
@@ -50,19 +59,25 @@ export function toConfig(search: CalculatorSearch): DrivetrainConfig {
   };
 }
 
-export function formatCompareTuple(config: DrivetrainConfig): string {
+export function fromConfig(config: DrivetrainConfig): CalculatorSearch {
   const wheel =
     (Object.keys(WHEEL_SIZES) as WheelSizeId[]).find(
       (id) => WHEEL_SIZES[id].bsdMm === config.wheel.beadSeatDiameterMm,
     ) ?? "700c";
-  return [
-    config.chainringTeeth,
-    config.cogTeeth,
+  return {
+    v: 1,
+    chainring: config.chainringTeeth,
+    cog: config.cogTeeth,
     wheel,
-    config.wheel.tireWidthMm,
-    config.crankLengthMm,
-    config.ambidextrousSkidder ? 1 : 0,
-  ].join(",");
+    tire: config.wheel.tireWidthMm,
+    crank: config.crankLengthMm,
+    ambi: config.ambidextrousSkidder ? 1 : 0,
+  };
+}
+
+export function formatCompareTuple(config: DrivetrainConfig): string {
+  const s = fromConfig(config);
+  return [s.chainring, s.cog, s.wheel, s.tire, s.crank, s.ambi].join(",");
 }
 
 export function parseCompareTuple(raw: unknown): DrivetrainConfig | undefined {
@@ -85,7 +100,9 @@ export function parseCompareTuple(raw: unknown): DrivetrainConfig | undefined {
 export function compactCompareExtras(s: CompareExtras): CompareExtras {
   const present = [s.c2, s.c3, s.c4].filter(
     (t): t is string =>
-      typeof t === "string" && t.length > 0 && parseCompareTuple(t) !== undefined,
+      typeof t === "string" &&
+      t.length > 0 &&
+      parseCompareTuple(t) !== undefined,
   );
   const out: CompareExtras = {};
   if (present[0]) out.c2 = present[0];
@@ -107,6 +124,47 @@ export function seedCompareExtras(
     c2: formatCompareTuple(plus),
     c3: formatCompareTuple(minus),
   };
+}
+
+export function extrasAfterAdd(
+  bike: CalculatorSearch,
+  extras: CompareExtras,
+): CompareExtras {
+  const compacted = compactCompareExtras(extras);
+  const copy = formatCompareTuple(toConfig(bike));
+  if (!compacted.c2) return { c2: copy };
+  if (!compacted.c3) return { ...compacted, c3: copy };
+  if (!compacted.c4) return { ...compacted, c4: copy };
+  return compacted;
+}
+
+export function extrasAfterRemove(
+  extras: CompareExtras,
+  slot: CompareExtraSlot,
+): CompareExtras {
+  return compactCompareExtras({
+    c2: slot === "c2" ? undefined : extras.c2,
+    c3: slot === "c3" ? undefined : extras.c3,
+    c4: slot === "c4" ? undefined : extras.c4,
+  });
+}
+
+export function buildCompareColumns(
+  bike: CalculatorSearch,
+  extras: CompareExtras,
+): CompareColumn[] {
+  const seeded = seedCompareExtras(bike, extras);
+  const columns: CompareColumn[] = [{ slot: "c1", bike, removable: false }];
+  for (const slot of ["c2", "c3", "c4"] as const) {
+    const parsed = parseCompareTuple(seeded[slot]);
+    if (!parsed) continue;
+    columns.push({
+      slot,
+      bike: fromConfig(parsed),
+      removable: true,
+    });
+  }
+  return columns;
 }
 
 export function parseExploreSearch(s: Record<string, unknown>): ExploreSearch {
