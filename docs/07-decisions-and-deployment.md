@@ -2,17 +2,17 @@
 
 ## UI library decision (ADR-001)
 
-No third-party component library in v1. Kobalte, Ark UI, solid-ui, and
-solidcn have not shipped Solid 2.0-compatible releases as of August 2026
-(Kobalte stable peers on solid-js ^1.x; Ark UI deferred to post-RC).
+No third-party component library. Kobalte, Ark UI, solid-ui, and solidcn
+have not shipped Solid 2.0-compatible releases as of August 2026 (Kobalte
+stable peers on solid-js ^1.x; Ark UI deferred to post-RC).
 
 - Use native HTML elements (`input[type=range]`, `select`, `button`,
   `details`, `dialog`) styled with Tailwind 4.
 - Wrap each in `src/components/ui/` so a future Kobalte 2.0 migration
   touches only wrapper internals.
 - Add ARIA attributes manually: `aria-label` on all inputs, `role="img"`
-  + `aria-label` on the skid visualizer SVG, `aria-live="polite"` on
-  metric value regions.
+  - `aria-label` on the skid visualizer SVG, `aria-live="polite"` on
+    metric value regions.
 
 ## Form library decision (ADR-002)
 
@@ -33,9 +33,9 @@ Netlify, static site.
 - Do NOT configure a router basepath; the site serves from `/`
 - Chosen over GitHub Pages because: clean SPA fallback for deep links
   (no 404 hack or hash history), no repo-name basepath, deploy previews,
-  and a functions upgrade path if v2 adds accounts/sync.
+  and a functions upgrade path if accounts/sync land later.
 
-v1 is local computation, not a PWA. Do not describe the site as
+This build is local computation, not a PWA. Do not describe the site as
 offline-first in the UI or README until an installable manifest exists.
 
 ## TanStack version pins (ADR-004)
@@ -69,22 +69,27 @@ there are two foot-sets.
 
 ## Wheel catalog (ADR-006)
 
-v1 sizes: **700c (622), 650b (584), 26in (559)**. Tire width **18–50 mm**.
+Sizes: **700c (622), 650b (584), 26in (559)**. Tire width **18–50 mm**.
 
 650c (571) is a rare triathlon / old-track size; street/gravel/commuter
-bikes that aren’t 700c are 650b. 650c can return in v1.1 if someone asks.
-Unknown `wheel` values, including `650c`, parse as `700c`.
+bikes that aren’t 700c are 650b. 650c remains deferred. Unknown `wheel`
+values, including `650c`, parse as `700c`.
 
-Diameter stays `BSD + 2 × tireWidth` so seeded chart numbers remain
+Diameter defaults to `BSD + 2 × tireWidth` so chart numbers remain
 comparable to other web calculators. The tooltip discloses the
-approximation. Measured circumference is v2.
+approximation. **Measured circumference is implemented** as optional URL
+`circ` / `WheelSpec.circumferenceMm` (integer 1800–2500 mm). When set,
+`C_m = circ / 1000` and `D_mm = circ / π`. When unset or invalid, the BSD
+approximation remains the default.
 
 ## Global search and compare encoding (ADR-007)
 
-The calculator keys live on **every** route. Compare extras are optional
-compact tuples `c2`/`c3`/`c4`. Missing **all** extras seeds neighbor cogs
-(the shop question: 17 vs 16 vs 18). A link with only `c2` is a two-bike
-compare and must not bounce back to three. One-column compare is not a
-product.
+The calculator keys live on **every** route, including required `stay`
+(default 410) and optional `circ`. Compare extras are optional compact
+tuples `c2`/`c3`/`c4` — six fields without circ, seven with. Missing
+**all** extras seeds neighbor cogs (the shop question: 17 vs 16 vs 18). A
+link with only `c2` is a two-bike compare and must not bounce back to
+three. One-column compare is not a product.
 
-Column 1 is a live alias of the global search, not a snapshot.
+Column 1 is a live alias of the global search, not a snapshot. Stay is
+URL-only (not in tuples or saved setups).

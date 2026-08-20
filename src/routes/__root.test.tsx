@@ -66,6 +66,25 @@ describe("root nav search", () => {
     ).toBe("true");
   });
 
+  it("preserves stay and circ from / to /explore", async () => {
+    const { getByRole, testRouter } = await renderAt(
+      "/?chainring=48&cog=16&stay=405&circ=2130",
+    );
+    fireEvent.click(getByRole("link", { name: "Explore" }));
+    flush();
+    await testRouter.load();
+    flush();
+    await vi.waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe("/explore");
+    });
+    expect(testRouter.state.location.search).toMatchObject({
+      chainring: 48,
+      cog: 16,
+      stay: 405,
+      circ: 2130,
+    });
+  });
+
   it("keeps compare extras when using the Compare nav link", async () => {
     const { getByRole, getByText, queryByText, testRouter } = await renderAt(
       "/compare?c2=52,14,700c,25,170,0",
