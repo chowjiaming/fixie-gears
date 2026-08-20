@@ -52,6 +52,7 @@ describe("MetricCard", () => {
         warning="Few skid patches — tire wear will concentrate."
       />
     ));
+    expect(getByText("1")).toBeTruthy();
     expect(getByText(/few skid patches/i)).toBeTruthy();
   });
 

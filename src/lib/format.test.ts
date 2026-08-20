@@ -22,8 +22,19 @@ describe("spoken variants", () => {
   });
 
   it("keeps the same digits as the visible formatters", () => {
-    expect(formatDevelopmentSpoken(2.1112).startsWith("2.11")).toBe(true);
-    expect(formatGearInchesSpoken(88.42).startsWith("88.4")).toBe(true);
+    const developmentValue = 2.1112;
+    const visibleDevelopment = formatDevelopment(developmentValue);
+    const numericDevelopment = visibleDevelopment.replace(/ m$/, "");
+    expect(
+      formatDevelopmentSpoken(developmentValue).startsWith(numericDevelopment),
+    ).toBe(true);
+
+    const gearInchesValue = 88.42;
+    const visibleGearInches = formatGearInches(gearInchesValue);
+    const numericGearInches = visibleGearInches.replace(/″$/, "");
+    expect(
+      formatGearInchesSpoken(gearInchesValue).startsWith(numericGearInches),
+    ).toBe(true);
   });
 
   it("does not say one meters", () => {
