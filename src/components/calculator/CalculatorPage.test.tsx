@@ -86,7 +86,7 @@ describe("CalculatorPage", () => {
     expect(cardLabels().slice(1, 3)).toEqual(["Development", "Gear inches"]);
     expect(getByText(/km\/h/)).toBeTruthy();
 
-    fireEvent.click(getByRole("button", { name: "Imperial" }));
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
     flush();
 
     expect(cardLabels().slice(1, 3)).toEqual(["Gear inches", "Development"]);
@@ -166,7 +166,7 @@ describe("CalculatorPage", () => {
     const { getByRole, getAllByRole, search } = renderCalculator(
       parseCalculatorSearch({ stay: 405 }),
     );
-    fireEvent.click(getByRole("button", { name: "Imperial" }));
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
     flush();
 
     const stepper = getAllByRole("spinbutton", {
