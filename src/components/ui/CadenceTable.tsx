@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import { formatSpeed } from "~/lib/format";
-import type { Units } from "~/lib/state/prefs-store";
 import type { SpeedRow } from "~/lib/gear/types";
+import type { Units } from "~/lib/state/prefs-store";
 
 export interface CadenceTableProps {
   speeds: SpeedRow[];

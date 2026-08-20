@@ -29,3 +29,7 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+
+# Local Lefthook overrides
+lefthook-local.yml
+.lefthook-local.yml

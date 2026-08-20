@@ -1,5 +1,5 @@
-import type { ParentProps } from "solid-js";
 import { HydrationScript } from "@solidjs/web";
+import type { ParentProps } from "solid-js";
 
 const THEME_BOOTSTRAP = `(function(){try{var t="system";var raw=localStorage.getItem("fixie:prefs");if(raw){var p=JSON.parse(raw);if(p&&(p.theme==="light"||p.theme==="dark"||p.theme==="system"))t=p.theme;}var dark=t==="dark"||(t==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.className=dark?"dark":"";}catch(e){}})();`;
 

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/solid-router";
 import { ComparePage } from "~/components/compare/ComparePage";
 import {
-  parseCalculatorSearch,
-  seedCompareExtras,
   type CalculatorSearch,
   type CompareExtras,
+  parseCalculatorSearch,
+  seedCompareExtras,
 } from "~/lib/search";
 
 export const Route = createFileRoute("/compare")({

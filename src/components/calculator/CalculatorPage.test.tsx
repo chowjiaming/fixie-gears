@@ -1,12 +1,12 @@
-import { fireEvent, getQueriesForElement } from "@testing-library/dom";
-import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
+import { render as solidRender } from "@solidjs/web";
+import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it } from "vitest";
 import { CalculatorView } from "~/components/calculator/CalculatorPage";
 import { UnitToggle } from "~/components/ui/UnitToggle";
-import { deriveMetrics } from "~/lib/gear/calculations";
 import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
+import { deriveMetrics } from "~/lib/gear/calculations";
 import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import { setUnits } from "~/lib/state/prefs-store";
 

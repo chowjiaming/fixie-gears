@@ -8,10 +8,10 @@ import { CopyLinkButton } from "~/components/ui/CopyLinkButton";
 import { ThemeToggle } from "~/components/ui/ThemeToggle";
 import { UnitToggle } from "~/components/ui/UnitToggle";
 import {
+  type CalculatorSearch,
   compactCompareExtras,
   parseCalculatorSearch,
   parseExploreSearch,
-  type CalculatorSearch,
 } from "~/lib/search";
 
 export const Route = createRootRoute({

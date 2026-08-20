@@ -1,17 +1,17 @@
-import { Show, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { CompareTable } from "~/components/compare/CompareTable";
 import {
   buildCompareColumns,
+  type CalculatorSearch,
+  type CompareExtraSlot,
+  type CompareExtras,
+  type CompareSlot,
   compactCompareExtras,
   extrasAfterAdd,
   extrasAfterRemove,
   formatCompareTuple,
   seedCompareExtras,
   toConfig,
-  type CalculatorSearch,
-  type CompareExtras,
-  type CompareExtraSlot,
-  type CompareSlot,
 } from "~/lib/search";
 import type { Units } from "~/lib/state/prefs-store";
 import { saveCompareColumns } from "~/lib/state/saved-store";

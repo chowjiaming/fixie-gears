@@ -1,10 +1,10 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from "node:url";
-import type { PluginOption } from "vite";
-import { defineConfig } from "vite";
 import solid from "@solidjs/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import type { PluginOption } from "vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [

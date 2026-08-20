@@ -10,16 +10,20 @@
     "serve": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "format": "biome check --write .",
+    "prepare": "lefthook install"
   },
   "license": "MIT",
   "devDependencies": {
+    "@biomejs/biome": "2.5.9",
     "@solidjs/testing-library": "^0.8.10",
     "@solidjs/vite-plugin": "^3.0.0-next.29",
     "@tanstack/router-plugin": "^1.168.34",
     "@types/node": "^26.2.0",
     "jsdom": "^30.0.1",
-    "prettier": "^3.9.6",
+    "lefthook": "^2.1.10",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.11"
