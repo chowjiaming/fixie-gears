@@ -2,7 +2,7 @@ import { createRoot, createStore, flush } from "solid-js";
 import { ALLOWED_CRANKS_MM } from "~/lib/gear/calculations";
 import type { DrivetrainConfig } from "~/lib/gear/types";
 import { WHEEL_SIZES } from "~/lib/gear/wheels";
-import { toConfig, type CalculatorSearch } from "~/lib/search";
+import { parseCirc, toConfig, type CalculatorSearch } from "~/lib/search";
 
 export const SAVED_STORAGE_KEY = "fixie:saved";
 
@@ -49,13 +49,17 @@ function isIntInRange(
 }
 
 function cloneConfig(config: DrivetrainConfig): DrivetrainConfig {
+  const wheel: DrivetrainConfig["wheel"] = {
+    beadSeatDiameterMm: config.wheel.beadSeatDiameterMm,
+    tireWidthMm: config.wheel.tireWidthMm,
+  };
+  if (config.wheel.circumferenceMm !== undefined) {
+    wheel.circumferenceMm = config.wheel.circumferenceMm;
+  }
   return {
     chainringTeeth: config.chainringTeeth,
     cogTeeth: config.cogTeeth,
-    wheel: {
-      beadSeatDiameterMm: config.wheel.beadSeatDiameterMm,
-      tireWidthMm: config.wheel.tireWidthMm,
-    },
+    wheel,
     crankLengthMm: config.crankLengthMm,
     ambidextrousSkidder: config.ambidextrousSkidder,
   };
@@ -85,12 +89,14 @@ function parseConfig(raw: unknown): DrivetrainConfig | undefined {
   ) {
     return undefined;
   }
+  const circ = parseCirc(wheel.circumferenceMm);
   return cloneConfig({
     chainringTeeth: raw.chainringTeeth,
     cogTeeth: raw.cogTeeth,
     wheel: {
       beadSeatDiameterMm: wheel.beadSeatDiameterMm,
       tireWidthMm: wheel.tireWidthMm,
+      ...(circ !== undefined ? { circumferenceMm: circ } : {}),
     },
     crankLengthMm: raw.crankLengthMm,
     ambidextrousSkidder: raw.ambidextrousSkidder,

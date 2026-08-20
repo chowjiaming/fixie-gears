@@ -40,7 +40,10 @@ export function SavedPage() {
     <SavedView
       search={search()}
       onLoad={(bike) => {
-        void go({ to: "/", search: bike });
+        void go({
+          to: "/",
+          search: { ...bike, stay: search().stay },
+        });
       }}
     />
   );
