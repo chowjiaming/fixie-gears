@@ -1,4 +1,4 @@
-import { createMemo, For } from "solid-js";
+import { createMemo, createSignal, For } from "solid-js";
 import { deriveMetrics } from "~/lib/gear/calculations";
 import { GOOD_SKID_PATCHES } from "~/lib/gear/skid";
 import type { DerivedMetrics } from "~/lib/gear/types";
@@ -56,6 +56,21 @@ const RGB_SKID_PALE: Rgb = [235, 247, 236];
 const RGB_SKID_GREEN: Rgb = [22, 128, 57];
 
 const RING_COLUMNS = `repeat(${HEATMAP_RINGS.length}, minmax(1.75rem, 1fr))`;
+
+const HEATMAP_HELP_ID = "heatmap-keyboard-help";
+
+interface HeatmapCoords {
+  ring: number;
+  cog: number;
+}
+
+/** Rings are columns and cogs are rows, so left/right step the ring. */
+const CELL_STEPS = new Map<string, HeatmapCoords>([
+  ["ArrowRight", { ring: 1, cog: 0 }],
+  ["ArrowLeft", { ring: -1, cog: 0 }],
+  ["ArrowDown", { ring: 0, cog: 1 }],
+  ["ArrowUp", { ring: 0, cog: -1 }],
+]);
 
 export interface HeatmapGridProps {
   bike: CalculatorSearch;
@@ -173,12 +188,46 @@ export function buildHeatmapCells(bike: CalculatorSearch): HeatmapCellData[] {
   return cells;
 }
 
+function cellKey(ring: number, cog: number): string {
+  return `${ring}/${cog}`;
+}
+
+function clampToRange(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function hasModifier(event: KeyboardEvent): boolean {
+  return event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
+}
+
+/**
+ * Where the roving tab stop lands for `key`, or undefined when the key is
+ * none of ours. Edges clamp rather than wrap.
+ */
+function moveHeatmapFocus(
+  from: HeatmapCoords,
+  key: string,
+): HeatmapCoords | undefined {
+  if (key === "Home") return { ring: HEATMAP_RING_MIN, cog: from.cog };
+  if (key === "End") return { ring: HEATMAP_RING_MAX, cog: from.cog };
+  const step = CELL_STEPS.get(key);
+  if (!step) return undefined;
+  return {
+    ring: clampToRange(
+      from.ring + step.ring,
+      HEATMAP_RING_MIN,
+      HEATMAP_RING_MAX,
+    ),
+    cog: clampToRange(from.cog + step.cog, HEATMAP_COG_MIN, HEATMAP_COG_MAX),
+  };
+}
+
 function requireCell(
   map: Map<string, HeatmapCellData>,
   ring: number,
   cog: number,
 ): HeatmapCellData {
-  const found = map.get(`${ring}/${cog}`);
+  const found = map.get(cellKey(ring, cog));
   if (!found) {
     throw new Error(`missing heatmap cell ${ring}/${cog}`);
   }
@@ -194,6 +243,31 @@ function mixRgb(a: Rgb, b: Rgb, t: number): string {
 }
 
 export function HeatmapGrid(props: HeatmapGridProps) {
+  let grid: HTMLFieldSetElement | undefined;
+
+  // Read once: this is only the starting tab stop, the keyboard owns it after.
+  const [focused, setFocused] = createSignal<HeatmapCoords>(
+    isInHeatmapWindow(props.bike.chainring, props.bike.cog)
+      ? { ring: props.bike.chainring, cog: props.bike.cog }
+      : { ring: HEATMAP_RING_MIN, cog: HEATMAP_COG_MIN },
+  );
+
+  const focusedKey = createMemo(() => cellKey(focused().ring, focused().cog));
+
+  const onGridKeyDown = (event: KeyboardEvent) => {
+    // Modified arrows belong to the browser and the OS (⌘← goes back).
+    if (hasModifier(event)) return;
+    const next = moveHeatmapFocus(focused(), event.key);
+    if (!next) return;
+    event.preventDefault();
+    setFocused(next);
+    grid
+      ?.querySelector<HTMLButtonElement>(
+        `[data-cell="${cellKey(next.ring, next.cog)}"]`,
+      )
+      ?.focus();
+  };
+
   const cells = createMemo(() =>
     buildHeatmapCells({
       v: 1,
@@ -307,11 +381,21 @@ export function HeatmapGrid(props: HeatmapGridProps) {
         </p>
       </div>
 
+      <p class="sr-only" id={HEATMAP_HELP_ID}>
+        Use the arrow keys to move between setups, then press Enter to open one
+        in the calculator.
+      </p>
+
       <div class="overflow-x-auto">
         <fieldset
+          ref={(element) => {
+            grid = element;
+          }}
           class="m-0 grid min-w-[44rem] gap-1 border-0 p-0"
           style={{ "grid-template-columns": "auto 1fr" }}
           aria-label="Chainring by cog heatmap"
+          aria-describedby={HEATMAP_HELP_ID}
+          onKeyDown={onGridKeyDown}
         >
           <div aria-hidden="true" />
           <div
@@ -365,6 +449,7 @@ export function HeatmapGrid(props: HeatmapGridProps) {
                             cog() === props.bike.cog
                           }
                           metric={props.metric}
+                          tabbable={focusedKey() === cellKey(ring(), cog())}
                           onSelect={props.onSelect}
                         />
                       );
@@ -409,6 +494,7 @@ function HeatmapCell(props: {
   dimmed: boolean;
   current: boolean;
   metric: HeatmapMetric;
+  tabbable: boolean;
   onSelect: (chainring: number, cog: number) => void;
 }) {
   const label = () =>
@@ -417,11 +503,13 @@ function HeatmapCell(props: {
   return (
     <button
       type="button"
+      data-cell={cellKey(props.ring, props.cog)}
+      tabindex={props.tabbable ? 0 : -1}
       aria-label={label()}
       aria-current={props.current ? "true" : undefined}
       title={`${props.ring}/${props.cog} · ${heatmapAriaValue(props.value, props.metric)}`}
       class={[
-        "group relative flex aspect-square min-h-8 min-w-8 items-center justify-center rounded-sm text-[10px] leading-none",
+        "focus-ring group relative flex aspect-square min-h-8 min-w-8 items-center justify-center rounded-sm text-[10px] leading-none",
         {
           "opacity-35": props.dimmed,
           "z-10 outline outline-2 outline-accent outline-offset-0":

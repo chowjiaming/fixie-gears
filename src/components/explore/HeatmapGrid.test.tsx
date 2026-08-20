@@ -9,7 +9,10 @@ import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import {
   buildHeatmapCells,
   buildHeatmapScale,
+  HEATMAP_COG_MIN,
   HEATMAP_COGS,
+  HEATMAP_RING_MAX,
+  HEATMAP_RING_MIN,
   HEATMAP_RINGS,
   HeatmapGrid,
   heatmapAriaLabel,
@@ -185,5 +188,103 @@ describe("HeatmapGrid", () => {
 
     expect(metrics).toEqual(["dev", "skid"]);
     expect(filters).toEqual([GOOD_SKID_PATCHES]);
+  });
+});
+
+describe("heatmap roving tabindex", () => {
+  const cellAt = (key: string) =>
+    host!.querySelector<HTMLButtonElement>(`[data-cell="${key}"]`);
+  const focusedKey = () =>
+    (document.activeElement as HTMLElement | null)?.dataset.cell;
+
+  it("exposes exactly one tab stop", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }));
+    expect(host!.querySelectorAll('button[tabindex="0"]')).toHaveLength(1);
+    expect(host!.querySelectorAll('button[tabindex="-1"]')).toHaveLength(298);
+  });
+
+  it("starts the tab stop on the current bike", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }));
+    expect(
+      host!.querySelector('button[tabindex="0"]')?.getAttribute("data-cell"),
+    ).toBe("46/17");
+  });
+
+  it("falls back to the first cell when the bike is outside the window", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 80, cog: 30 }));
+    expect(
+      host!.querySelector('button[tabindex="0"]')?.getAttribute("data-cell"),
+    ).toBe(`${HEATMAP_RING_MIN}/${HEATMAP_COG_MIN}`);
+  });
+
+  it("moves focus with arrows without committing", () => {
+    const picked: { chainring: number; cog: number }[] = [];
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }), {
+      onSelect: (chainring, cog) => picked.push({ chainring, cog }),
+    });
+    const cell = cellAt("46/17");
+    cell?.focus();
+    fireEvent.keyDown(cell!, { key: "ArrowRight" });
+    flush();
+    expect(focusedKey()).toBe("47/17");
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    flush();
+    expect(focusedKey()).toBe("47/18");
+    expect(picked).toEqual([]);
+  });
+
+  it("clamps at the edges instead of wrapping", () => {
+    renderGrid(
+      parseCalculatorSearch({
+        chainring: HEATMAP_RING_MIN,
+        cog: HEATMAP_COG_MIN,
+      }),
+    );
+    const first = cellAt(`${HEATMAP_RING_MIN}/${HEATMAP_COG_MIN}`);
+    first?.focus();
+    fireEvent.keyDown(first!, { key: "ArrowLeft" });
+    flush();
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowUp" });
+    flush();
+    expect(focusedKey()).toBe(`${HEATMAP_RING_MIN}/${HEATMAP_COG_MIN}`);
+  });
+
+  it("jumps to row ends with Home and End", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }));
+    const cell = cellAt("46/17");
+    cell?.focus();
+    fireEvent.keyDown(cell!, { key: "Home" });
+    flush();
+    expect(focusedKey()).toBe(`${HEATMAP_RING_MIN}/17`);
+    fireEvent.keyDown(document.activeElement!, { key: "End" });
+    flush();
+    expect(focusedKey()).toBe(`${HEATMAP_RING_MAX}/17`);
+  });
+
+  it("still commits on activation and leaves Enter to the button", () => {
+    const picked: { chainring: number; cog: number }[] = [];
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }), {
+      onSelect: (chainring, cog) => picked.push({ chainring, cog }),
+    });
+    const cell = cellAt("47/17");
+    // Enter must not be swallowed by the arrow handler
+    const enter = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    cell?.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    // native activation still reaches onSelect
+    fireEvent.click(cell!);
+    expect(picked).toEqual([{ chainring: 47, cog: 17 }]);
+  });
+
+  it("describes the keyboard model for screen readers", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }));
+    const id = host!
+      .querySelector("[aria-describedby]")
+      ?.getAttribute("aria-describedby");
+    expect(host!.querySelector(`#${id}`)?.textContent).toMatch(/arrow keys/i);
   });
 });
