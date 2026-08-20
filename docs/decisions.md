@@ -1,4 +1,4 @@
-# Decisions & Deployment
+# Decisions
 
 ## UI library decision (ADR-001)
 
@@ -14,7 +14,7 @@ stable peers on solid-js ^1.x; Ark UI deferred to post-RC).
   `role="img"` plus `aria-label` on the skid visualizer SVG. Announcing
   a changed value is a page-level job rather than a component one — `/`
   carries a single `sr-only` `aria-live="polite"` region and the metric
-  cards are silent (see `docs/05-ui-design.md`).
+  cards are silent (see `docs/architecture.md`).
 
 ## Form library decision (ADR-002)
 
@@ -172,9 +172,11 @@ The app is a public resource, not an npm package.
 - MIT at repo root (`LICENSE`), copyright 2026 chowjiaming, so GitHub
   detects the license. `package.json` stays `"license": "MIT"` and
   `"private": true` to block accidental publish.
-- Visitor docs live in `README.md`. Engineering docs live in `docs/`.
-  Do not duplicate domain math into the README.
+- Visitor-facing product copy lives in `README.md`. `README.md` also
+  carries a short paragraph per handbook page with a link to the full
+  version. Engineering docs live in `docs/`. Formulas and search-param
+  tables live only in `docs/domain.md` and
+  `docs/state-and-routing.md`.
 - CI is GitHub Actions (`.github/workflows/ci.yml`). Deploy remains
   Netlify (`netlify.toml`). Package manager is pnpm, not Corepack
   (ADR-010).
-

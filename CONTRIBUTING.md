@@ -26,5 +26,4 @@ Use conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, `test:`,
   framework imports. The UI never contains formulas.
 - Do not bump TanStack or `solid-js` without checking peer ranges
   (ADR-004).
-- Agents: read [`AGENTS.md`](AGENTS.md) and [`docs/`](docs/00-project-overview.md)
-  first.
+- Agents: [`AGENTS.md`](AGENTS.md). Handbook map: [README.md](README.md).

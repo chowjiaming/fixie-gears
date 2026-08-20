@@ -1,25 +1,31 @@
 # Agent Instructions
 
-You are implementing **Fixie Gears**, a fixed-gear ratio calculator. Read all
-files in `docs/` before writing code. Implement in this order:
+Fixie Gears is a Solid 2.0 street-fixie ratio calculator. Behavior
+lives in `src/`. Constraints live here and in the handbook pages
+named below.
 
-1. `src/lib/gear/` — copy the seed code from `docs/08-seed-code.md`
-   verbatim, run the tests, get them green before any UI.
-2. Routing skeleton (`__root`, `index`, `compare`, `explore`, `saved`) with
-   the **shared** calculator search parser on every route (see `docs/04`).
-3. Calculator page (F1) end-to-end: inputs → URL → memos → metric cards.
-4. Skid visualizer (F2), then compare (F3), explore (F4), saved (F5),
-   prefs (F6).
+## Open when the task needs it
+
+- Stack, `src/` layout, UI wrappers, how to test:
+  [`docs/architecture.md`](docs/architecture.md)
+- Types, formulas, skid patches, chain links:
+  [`docs/domain.md`](docs/domain.md)
+- URL search, compare/explore extras, Solid 1.x replacements:
+  [`docs/state-and-routing.md`](docs/state-and-routing.md)
+- Why a rule exists (ADRs):
+  [`docs/decisions.md`](docs/decisions.md)
 
 ## Hard rules
 
 - **Solid 2.0 APIs only.** Forbidden: `createResource`, `batch`,
   `startTransition`, `useTransition`, `on`, `createComputed`, `produce`,
   `createMutable`, `onMount`, `classList`, `use:` directives, `<Index>`.
-  See `docs/04-state-and-routing.md` for replacements.
-- `<For>` children receive accessors: `{(item) => <li>{item().name}</li>}`.
+  Replacements: `docs/state-and-routing.md`.
+- `<For>` children receive accessors:
+  `{(item) => <li>{item().name}</li>}`.
 - **No third-party component or form libraries** (ADR-001, ADR-002 in
-  `docs/07`). Native elements + Tailwind wrappers in `src/components/ui/`.
+  `docs/decisions.md`). Native elements + Tailwind wrappers in
+  `src/components/ui/`.
 - All domain math lives in `src/lib/gear/` as pure functions with no
   framework imports. UI never contains formulas.
 - Never store derived values in signals/stores — always `createMemo`.
@@ -30,31 +36,20 @@ files in `docs/` before writing code. Implement in this order:
 - Format and lint with Biome (`pnpm format` / `pnpm check`). Print
   width 80, 2-space indent. Lefthook runs Biome on commit and Biome plus
   typecheck on push.
-- Run `pnpm test` after each milestone; do not proceed with failing
-  tests.
+- After editing, `pnpm test`, `pnpm typecheck`, and `pnpm check` must
+  pass. `pnpm build` must emit `dist/client`.
 - Package manager is **pnpm**. Do not run `npm install` or commit a
   `package-lock.json`.
 - PRs must stay green on GitHub Actions CI (`pnpm check`, `pnpm
   typecheck`, `pnpm test`, `pnpm build`).
 
-## Verification checklist per milestone
-
-- [ ] `pnpm dev` starts without errors
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` is clean
-- [ ] `pnpm typecheck` is clean
-- [ ] `pnpm build` emits `dist/client`
-- [ ] No Solid 1.x APIs anywhere
-      (`grep -r "createResource\|classList\|produce" src/`)
-- [ ] `netlify.toml` present at repo root with SPA fallback redirect
-
 ## Dependency pinning (ADR-004)
 
-- `@tanstack/solid-router` and `@tanstack/solid-router-devtools` are pinned
-  to the `2.0.0-rc.x` line (Solid 2.0-compatible). The `latest` dist-tag
-  (1.x) peers on solid-js ^1.x and MUST NOT be installed.
+- `@tanstack/solid-router` and `@tanstack/solid-router-devtools` are
+  pinned to the `2.0.0-rc.x` line (Solid 2.0-compatible). The `latest`
+  dist-tag (1.x) peers on solid-js ^1.x and MUST NOT be installed.
 - `@tanstack/router-plugin` stays on latest 1.x.
 - `solid-js` / `@solidjs/web` are pinned to `2.0.0-rc.1` and re-enforced
   via package.json `overrides`. Do not remove them.
-- Never run `pnpm update` on TanStack packages without checking peer ranges
-  against the installed solid-js version first.
+- Never run `pnpm update` on TanStack packages without checking peer
+  ranges against the installed solid-js version first.
