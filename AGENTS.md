@@ -33,7 +33,8 @@ named below.
   mutate search state locally.
 - Calculator search params are global; navigating between routes must
   spread them. The app shell works offline after the first successful
-  visit; do not describe the product as offline-first.
+  visit; do not describe the product as offline-first, and do not claim
+  it works without ever having had a network.
 - Format and lint with Biome (`pnpm format` / `pnpm check`). Print
   width 80, 2-space indent. Lefthook runs Biome on commit and Biome plus
   typecheck on push.

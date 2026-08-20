@@ -28,3 +28,18 @@ jobs:
           test -f dist/client/index.html
           test -f dist/client/manifest.webmanifest
           test -f dist/client/sw.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          sw = Path("dist/client/sw.js").read_text(encoding="utf-8")
+          html = Path("dist/client/index.html").read_text(encoding="utf-8")
+          if "non-precached-url" in sw:
+              raise SystemExit("sw.js is a non-precached-url stub")
+          # Precache entry (not only createHandlerBoundToURL("index.html"))
+          if not re.search(r'url:\s*"index\.html"', sw):
+              raise SystemExit("sw.js precache missing url:\"index.html\"")
+          manifest_links = len(re.findall(r'rel=["\']manifest["\']', html))
+          if manifest_links != 1:
+              raise SystemExit(f'expected one rel="manifest", found {manifest_links}')
+          print("PWA emit asserts ok")
+          PY

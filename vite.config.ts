@@ -3,9 +3,9 @@ import { fileURLToPath, URL } from "node:url";
 import solid from "@solidjs/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import type { PluginOption } from "vite";
+import type { Plugin, PluginOption } from "vite";
 import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
+import { type VitePluginPWAAPI, VitePWA } from "vite-plugin-pwa";
 import {
   SITE_ACCENT,
   SITE_DESCRIPTION,
@@ -15,6 +15,30 @@ import {
 } from "./src/lib/site";
 
 const srcDir = fileURLToPath(new URL("./src", import.meta.url));
+
+/**
+ * Solid Start writes `dist/client/index.html` in `solid:start/prerender`
+ * (`buildApp`, order `post`) after `vite-plugin-pwa` already ran
+ * `generateSW` on `closeBundle`. Regenerate so the shell is precached.
+ */
+function regeneratePwaSwAfterPrerender(): Plugin {
+  return {
+    name: "fixie-gears:regenerate-pwa-sw",
+    apply: "build",
+    enforce: "post",
+    buildApp: {
+      order: "post",
+      async handler(builder) {
+        const pwaPlugin = builder.config.plugins.find(
+          (plugin) => plugin.name === "vite-plugin-pwa",
+        );
+        const api = pwaPlugin?.api as VitePluginPWAAPI | undefined;
+        if (!api || api.disabled) return;
+        await api.generateSW();
+      },
+    },
+  };
+}
 
 const pwaPlugins: PluginOption[] = process.env.VITEST
   ? []
@@ -28,6 +52,9 @@ const pwaPlugins: PluginOption[] = process.env.VITEST
         strategies: "generateSW",
         registerType: "autoUpdate",
         injectRegister: false,
+        // Solid Start client assets land here; pin so post-prerender
+        // generateSW does not follow a drifted viteConfig.build.outDir.
+        outDir: "dist/client",
         filename: "sw.js",
         manifestFilename: "manifest.webmanifest",
         includeAssets: [
@@ -93,6 +120,8 @@ export default defineConfig({
   plugins: [
     ...pwaPlugins,
     solid({ start: true }),
+    // enforce post + buildApp post: after solid:start/prerender writes index.html
+    ...(process.env.VITEST ? [] : [regeneratePwaSwAfterPrerender()]),
     tailwindcss(),
   ] satisfies PluginOption[],
   resolve: {
