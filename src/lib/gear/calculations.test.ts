@@ -4,12 +4,12 @@ import {
   clampInt,
   deriveMetrics,
   gainRatio,
-  snapCrankMm,
   STANDARD_CADENCES,
+  snapCrankMm,
 } from "./calculations";
 import {
-  gcd,
   GOOD_SKID_PATCHES,
+  gcd,
   skidPatchAngles,
   skidPatchCount,
   suggestSkidImprovements,

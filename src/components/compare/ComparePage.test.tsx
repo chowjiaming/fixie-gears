@@ -1,6 +1,6 @@
-import { fireEvent, getQueriesForElement } from "@testing-library/dom";
-import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
+import { render as solidRender } from "@solidjs/web";
+import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCalculatorSearch, seedCompareExtras } from "~/lib/search";
@@ -10,7 +10,7 @@ import {
   SAVED_STORAGE_KEY,
   saved,
 } from "~/lib/state/saved-store";
-import { CompareView, type CompareSearch } from "./CompareView";
+import { type CompareSearch, CompareView } from "./CompareView";
 
 let dispose: (() => void) | undefined;
 let host: HTMLDivElement | undefined;

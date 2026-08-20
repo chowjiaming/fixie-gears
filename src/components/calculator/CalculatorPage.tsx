@@ -1,20 +1,20 @@
-import { createMemo, For } from "solid-js";
 import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { createMemo, For } from "solid-js";
 import { SkidSuggestions } from "~/components/skid/SkidSuggestions";
 import { SkidVisualizer } from "~/components/skid/SkidVisualizer";
 import { CadenceTable } from "~/components/ui/CadenceTable";
 import { MetricCard } from "~/components/ui/MetricCard";
 import { PresetChips } from "~/components/ui/PresetChips";
 import { ToothInput } from "~/components/ui/ToothInput";
-import { ALLOWED_CRANKS_MM, snapCrankMm } from "~/lib/gear/calculations";
-import type { WheelSizeId } from "~/lib/gear/types";
-import { parseWheelSize, WHEEL_SIZES } from "~/lib/gear/wheels";
 import {
   formatDevelopment,
   formatGain,
   formatGearInches,
   formatRatio,
 } from "~/lib/format";
+import { ALLOWED_CRANKS_MM, snapCrankMm } from "~/lib/gear/calculations";
+import type { WheelSizeId } from "~/lib/gear/types";
+import { parseWheelSize, WHEEL_SIZES } from "~/lib/gear/wheels";
 import type { CalculatorSearch } from "~/lib/search";
 import { prefs } from "~/lib/state/prefs-store";
 import { useCurrentSetup } from "~/lib/state/setup-store";

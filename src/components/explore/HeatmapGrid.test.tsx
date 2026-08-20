@@ -1,6 +1,6 @@
-import { fireEvent, getQueriesForElement } from "@testing-library/dom";
-import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
+import { render as solidRender } from "@solidjs/web";
+import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { flush } from "solid-js";
 import { afterEach, describe, expect, it } from "vitest";
 import { deriveMetrics } from "~/lib/gear/calculations";
@@ -9,11 +9,11 @@ import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import {
   buildHeatmapCells,
   buildHeatmapScale,
-  heatmapAriaLabel,
-  heatmapFill,
   HEATMAP_COGS,
   HEATMAP_RINGS,
   HeatmapGrid,
+  heatmapAriaLabel,
+  heatmapFill,
   isInHeatmapWindow,
 } from "./HeatmapGrid";
 

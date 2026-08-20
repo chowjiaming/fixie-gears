@@ -5,10 +5,10 @@ import {
 } from "@tanstack/solid-router";
 import { HeatmapGrid } from "~/components/explore/HeatmapGrid";
 import {
-  parseCalculatorSearch,
-  parseExploreSearch,
   type CalculatorSearch,
   type ExploreSearch,
+  parseCalculatorSearch,
+  parseExploreSearch,
 } from "~/lib/search";
 
 export const Route = createFileRoute("/explore")({

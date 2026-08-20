@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import {
-  SAVED_STORAGE_KEY,
   compareColumnName,
   deleteSetup,
   duplicateSetup,
@@ -9,9 +8,10 @@ import {
   importSaved,
   reloadSavedFromStorage,
   renameSetup,
+  SAVED_STORAGE_KEY,
   saveCompareColumns,
-  saveSetup,
   saved,
+  saveSetup,
 } from "./saved-store";
 
 const SAMPLE = toConfig(parseCalculatorSearch({}));

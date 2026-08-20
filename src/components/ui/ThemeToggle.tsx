@@ -9,9 +9,8 @@ const OPTIONS: { id: Theme; label: string }[] = [
 
 export function ThemeToggle() {
   return (
-    <div
-      class="flex rounded border border-ink/15 dark:border-paper/20"
-      role="group"
+    <fieldset
+      class="m-0 flex min-w-0 rounded border border-ink/15 p-0 dark:border-paper/20"
       aria-label="Theme"
     >
       <For each={OPTIONS} keyed={(option) => option.id}>
@@ -31,6 +30,6 @@ export function ThemeToggle() {
           </button>
         )}
       </For>
-    </div>
+    </fieldset>
   );
 }
