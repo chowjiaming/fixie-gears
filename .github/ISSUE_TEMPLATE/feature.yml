@@ -18,4 +18,4 @@ body:
     attributes:
       value: >
         Geared/derailleur drivetrains and a backend are non-goals.
-        See docs/00-project-overview.md.
+        See the README for what the app does.
