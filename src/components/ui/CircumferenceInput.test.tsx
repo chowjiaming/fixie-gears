@@ -1,6 +1,6 @@
-import { fireEvent, getQueriesForElement } from "@testing-library/dom";
-import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
+import { render as solidRender } from "@solidjs/web";
+import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CircumferenceInput } from "./CircumferenceInput";

@@ -27,7 +27,9 @@ files in `docs/` before writing code. Implement in this order:
   mutate search state locally.
 - Calculator search params are global; navigating between routes must
   spread them. Do not claim offline-first in UI copy.
-- Format code with Prettier, print width 80.
+- Format and lint with Biome (`npm run format` / `npm run check`). Print
+  width 80, 2-space indent. Lefthook runs Biome on commit and Biome plus
+  typecheck on push.
 - Run `npm run test` after each milestone; do not proceed with failing
   tests.
 
@@ -35,6 +37,7 @@ files in `docs/` before writing code. Implement in this order:
 
 - [ ] `npm run dev` starts without errors
 - [ ] `npm run test` passes
+- [ ] `npm run check` is clean
 - [ ] `npm run typecheck` is clean
 - [ ] `npm run build` emits `dist/client`
 - [ ] No Solid 1.x APIs anywhere

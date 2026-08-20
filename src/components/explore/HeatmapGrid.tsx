@@ -3,9 +3,9 @@ import { deriveMetrics } from "~/lib/gear/calculations";
 import { GOOD_SKID_PATCHES } from "~/lib/gear/skid";
 import type { DerivedMetrics } from "~/lib/gear/types";
 import {
-  toConfig,
   type CalculatorSearch,
   type ExploreSearch,
+  toConfig,
 } from "~/lib/search";
 
 export const HEATMAP_RING_MIN = 38;
@@ -308,10 +308,9 @@ export function HeatmapGrid(props: HeatmapGridProps) {
       </div>
 
       <div class="overflow-x-auto">
-        <div
-          class="grid min-w-[44rem] gap-1"
+        <fieldset
+          class="m-0 grid min-w-[44rem] gap-1 border-0 p-0"
           style={{ "grid-template-columns": "auto 1fr" }}
-          role="group"
           aria-label="Chainring by cog heatmap"
         >
           <div aria-hidden="true" />
@@ -375,7 +374,7 @@ export function HeatmapGrid(props: HeatmapGridProps) {
               </div>
             )}
           </For>
-        </div>
+        </fieldset>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
-import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { render as solidRender } from "@solidjs/web";
 import {
   createMemoryHistory,
   createRouter,
   RouterProvider,
 } from "@tanstack/solid-router";
+import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "~/routeTree.gen";

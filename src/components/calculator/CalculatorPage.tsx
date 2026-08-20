@@ -1,13 +1,19 @@
-import { createMemo, For, Show } from "solid-js";
 import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { createMemo, For, Show } from "solid-js";
 import { ChainPanel } from "~/components/calculator/ChainPanel";
 import { SkidSuggestions } from "~/components/skid/SkidSuggestions";
 import { SkidVisualizer } from "~/components/skid/SkidVisualizer";
 import { CadenceTable } from "~/components/ui/CadenceTable";
+import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { MetricCard } from "~/components/ui/MetricCard";
 import { PresetChips } from "~/components/ui/PresetChips";
-import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { ToothInput } from "~/components/ui/ToothInput";
+import {
+  formatDevelopment,
+  formatGain,
+  formatGearInches,
+  formatRatio,
+} from "~/lib/format";
 import {
   ALLOWED_CRANKS_MM,
   clampInt,
@@ -16,14 +22,7 @@ import {
 import { STAY_DEFAULT_MM, STAY_MAX_MM, STAY_MIN_MM } from "~/lib/gear/chain";
 import type { WheelSizeId } from "~/lib/gear/types";
 import { parseWheelSize, WHEEL_SIZES } from "~/lib/gear/wheels";
-import {
-  formatDevelopment,
-  formatGain,
-  formatGearInches,
-  formatRatio,
-} from "~/lib/format";
-import type { CalculatorSearch } from "~/lib/search";
-import { applySearchPatch } from "~/lib/search";
+import { applySearchPatch, type CalculatorSearch } from "~/lib/search";
 import { prefs } from "~/lib/state/prefs-store";
 import { useCurrentSetup } from "~/lib/state/setup-store";
 

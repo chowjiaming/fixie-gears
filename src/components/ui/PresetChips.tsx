@@ -1,8 +1,8 @@
 import { For } from "solid-js";
+import { formatGearInches } from "~/lib/format";
 import { gearInches, gearRatio, PRESETS } from "~/lib/gear/calculations";
 import type { WheelSpec } from "~/lib/gear/types";
 import { wheelDiameterMm } from "~/lib/gear/wheels";
-import { formatGearInches } from "~/lib/format";
 
 export interface PresetChipsProps {
   wheel: WheelSpec;

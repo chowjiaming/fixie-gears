@@ -25,6 +25,7 @@
 /* Keep calculator inputs visible on desktop even if the mobile details was collapsed. */
 @media (min-width: 1024px) {
   details.setup-inputs:not([open]) > *:not(summary) {
+    /* biome-ignore lint/complexity/noImportantStyles: UA hides closed details with !important */
     display: block !important;
   }
 }

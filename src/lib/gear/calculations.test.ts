@@ -4,17 +4,17 @@ import {
   clampInt,
   deriveMetrics,
   gainRatio,
-  snapCrankMm,
   STANDARD_CADENCES,
+  snapCrankMm,
 } from "./calculations";
+import { CIRC_MAX_MM, CIRC_MIN_MM } from "./chain";
 import {
-  gcd,
   GOOD_SKID_PATCHES,
+  gcd,
   skidPatchAngles,
   skidPatchCount,
   suggestSkidImprovements,
 } from "./skid";
-import { CIRC_MAX_MM, CIRC_MIN_MM } from "./chain";
 import type { DrivetrainConfig } from "./types";
 import { parseWheelSize, wheelCircumferenceM, wheelDiameterMm } from "./wheels";
 

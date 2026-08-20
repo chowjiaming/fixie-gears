@@ -1,9 +1,9 @@
-import { For, Show, createSignal } from "solid-js";
 import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { createSignal, For, Show } from "solid-js";
+import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
 import { deriveMetrics } from "~/lib/gear/calculations";
 import { WHEEL_SIZES } from "~/lib/gear/wheels";
-import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
-import { fromConfig, toConfig, type CalculatorSearch } from "~/lib/search";
+import { type CalculatorSearch, fromConfig, toConfig } from "~/lib/search";
 import { prefs, type Units } from "~/lib/state/prefs-store";
 import {
   deleteSetup,
@@ -11,9 +11,9 @@ import {
   exportSavedJson,
   importSaved,
   renameSetup,
-  saveSetup,
-  saved,
   type SavedSetup,
+  saved,
+  saveSetup,
 } from "~/lib/state/saved-store";
 
 function setupSummary(setup: SavedSetup, units: Units): string {

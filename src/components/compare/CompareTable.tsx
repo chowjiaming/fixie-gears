@@ -1,7 +1,5 @@
 import { For, Show } from "solid-js";
 import { CompareColumnHeader } from "~/components/compare/CompareColumnHeader";
-import { deriveMetrics } from "~/lib/gear/calculations";
-import type { DerivedMetrics } from "~/lib/gear/types";
 import {
   formatDevelopment,
   formatGain,
@@ -9,12 +7,14 @@ import {
   formatRatio,
   formatSpeed,
 } from "~/lib/format";
+import { deriveMetrics } from "~/lib/gear/calculations";
+import type { DerivedMetrics } from "~/lib/gear/types";
 import {
-  toConfig,
   type CalculatorSearch,
   type CompareColumn,
   type CompareExtraSlot,
   type CompareSlot,
+  toConfig,
 } from "~/lib/search";
 import type { Units } from "~/lib/state/prefs-store";
 

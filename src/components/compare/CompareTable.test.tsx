@@ -1,9 +1,9 @@
-import { getQueriesForElement } from "@testing-library/dom";
-import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
+import { render as solidRender } from "@solidjs/web";
+import { getQueriesForElement } from "@testing-library/dom";
 import { afterEach, describe, expect, it } from "vitest";
-import { parseCalculatorSearch, type CompareColumn } from "~/lib/search";
-import { compareMetricRows, CompareTable } from "./CompareTable";
+import { type CompareColumn, parseCalculatorSearch } from "~/lib/search";
+import { CompareTable, compareMetricRows } from "./CompareTable";
 
 let dispose: (() => void) | undefined;
 let host: HTMLDivElement | undefined;

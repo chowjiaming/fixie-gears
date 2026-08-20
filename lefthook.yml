@@ -1,0 +1,18 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}"
+      exclude:
+        - package-lock.json
+        - src/routeTree.gen.ts
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    biome:
+      run: npx @biomejs/biome check --colors=off .
+    typecheck:
+      run: npm run typecheck

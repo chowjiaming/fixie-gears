@@ -8,9 +8,8 @@ const OPTIONS: { id: Units; label: string }[] = [
 
 export function UnitToggle() {
   return (
-    <div
-      class="flex rounded border border-ink/15 dark:border-paper/20"
-      role="group"
+    <fieldset
+      class="m-0 flex min-w-0 rounded border border-ink/15 p-0 dark:border-paper/20"
       aria-label="Units"
     >
       <For each={OPTIONS} keyed={(option) => option.id}>
@@ -30,6 +29,6 @@ export function UnitToggle() {
           </button>
         )}
       </For>
-    </div>
+    </fieldset>
   );
 }

@@ -2,7 +2,7 @@ import { createRoot, createStore, flush } from "solid-js";
 import { ALLOWED_CRANKS_MM } from "~/lib/gear/calculations";
 import type { DrivetrainConfig } from "~/lib/gear/types";
 import { WHEEL_SIZES } from "~/lib/gear/wheels";
-import { parseCirc, toConfig, type CalculatorSearch } from "~/lib/search";
+import { type CalculatorSearch, parseCirc, toConfig } from "~/lib/search";
 
 export const SAVED_STORAGE_KEY = "fixie:saved";
 
