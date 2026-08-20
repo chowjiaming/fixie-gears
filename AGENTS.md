@@ -34,6 +34,8 @@ files in `docs/` before writing code. Implement in this order:
   tests.
 - Package manager is **pnpm**. Do not run `npm install` or commit a
   `package-lock.json`.
+- PRs must stay green on GitHub Actions CI (`pnpm check`, `pnpm
+  typecheck`, `pnpm test`, `pnpm build`).
 
 ## Verification checklist per milestone
 
