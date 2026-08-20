@@ -17,6 +17,7 @@ How Fixie Gears is put together. Domain math:
 | UI primitives | Native HTML + Tailwind wrappers | ADR-001 in [decisions](decisions.md) |
 | Tests | Vitest + `@solidjs/testing-library` | Next to the source they cover |
 | Hosting | Netlify (static) | ADR-003 in [decisions](decisions.md) |
+| PWA | `vite-plugin-pwa` (Workbox `generateSW`) | App-shell offline after first visit |
 
 ## Rendering
 
@@ -29,8 +30,11 @@ site serves from `/`.
 ## Directory layout
 
 ```text
+public/                 # copied to dist/client; served before SPA fallback
 src/
 ├── App.tsx
+├── pwa.ts
+├── pwa-register.stub.ts
 ├── Document.tsx
 ├── router.tsx
 ├── routeTree.gen.ts      # generated; do not edit
@@ -42,6 +46,7 @@ src/
 │   ├── explore.tsx
 │   └── saved.tsx
 ├── lib/
+│   ├── site.ts
 │   ├── gear/             # pure math; no framework imports
 │   │   ├── types.ts
 │   │   ├── wheels.ts
