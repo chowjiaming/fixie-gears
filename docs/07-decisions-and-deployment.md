@@ -28,7 +28,7 @@ competes with the URL.
 
 Netlify, static site.
 
-- Build command: `npm run build`
+- Build command: `pnpm run build`
 - Publish directory: `dist/client`
 - SPA fallback via `netlify.toml` redirects (see repo root)
 - Production deploys from `main`; PRs get deploy previews
@@ -47,10 +47,11 @@ to the **`2.0.0-rc.x`** line (Solid 2.0-compatible). The `latest`
 dist-tag (1.x) peers on solid-js ^1.x and MUST NOT be installed.
 
 - `@tanstack/router-plugin` stays on latest 1.x.
-- `solid-js` / `@solidjs/web` versions are enforced via package.json
-  `overrides`. Do not remove them.
-- Never run `npm update` on TanStack packages without checking peer ranges
-  against the installed solid-js version first.
+- `solid-js` / `@solidjs/web` are pinned to `2.0.0-rc.1` and re-enforced
+  via package.json `overrides` (pnpm honors this field). Do not remove
+  them, and do not loosen the pins back to a caret while they are RCs.
+- Never run `pnpm update` on TanStack packages without checking peer
+  ranges against the installed solid-js version first.
 
 ## Skid formula (ADR-005)
 
@@ -141,3 +142,26 @@ alongside it and deliberately left out.
 - Until then every cell keeps its full `aria-label` ("46 tooth
   chainring, 17 tooth cog, 71.6 gear inches"), so only the positional
   shorthand is missing.
+
+## Package manager (ADR-010)
+
+**pnpm only.** The Solid `bare` template shipped a `pnpm-lock.yaml` and
+the scaffold then ran `npm install`, which added a `package-lock.json`.
+Every later dependency change updated only the npm lock, so the pnpm
+lock went stale (it never listed Biome, Lefthook, or TanStack).
+
+- `package.json` pins the version via `packageManager` (`pnpm@11.17.0`).
+  Install pnpm with the [standalone script](https://pnpm.io/installation)
+  (or Homebrew / winget / Scoop). Do **not** use Corepack: Node.js
+  stopped shipping it in v25, and pnpm dropped it from the CI docs
+  because the Corepack shim starts Node.js on every `pnpm` invocation.
+  The standalone binary reads `packageManager` itself and switches to
+  that version on first use.
+- `pnpm-workspace.yaml` is settings, not a monorepo: it allows Lefthook's
+  postinstall (the native binary the git hooks invoke) and sets
+  `minimumReleaseAge: 0` so RC/`next` tags are not delayed 24h behind
+  npm's "latest in range" resolution.
+- Netlify detects pnpm from `pnpm-lock.yaml` (and will prefer npm if a
+  `package-lock.json` is also present — do not re-add one).
+- `overrides` stays on `package.json` (ADR-004); pnpm honors that field.
+

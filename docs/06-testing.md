@@ -75,6 +75,6 @@ Playwright: share-link flow, preset application, compare deltas.
 ## Commands
 
 ```bash
-npm run test        # vitest
-npm run test:watch
+pnpm test        # vitest
+pnpm test:watch
 ```
