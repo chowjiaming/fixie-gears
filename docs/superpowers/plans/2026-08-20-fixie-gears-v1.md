@@ -110,7 +110,9 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
   plugins: [
-    tanstackRouter({ target: "solid", autoCodeSplitting: true }),
+    ...(process.env.VITEST
+      ? []
+      : [tanstackRouter({ target: "solid", autoCodeSplitting: true })]),
     solid({ start: true }),
     tailwindcss(),
   ],
@@ -142,9 +144,14 @@ Open `/home/chowjiaming/code/fixie-gears/docs/08-seed-code.md`. For each `## \`s
 
 Run: `npm run test`
 
-Expected: Vitest runs `src/lib/gear/calculations.test.ts` and all tests pass. If a test fails, you copied wrong — fix the copy, do not change the assertions to match a different formula.
+Expected: Vitest runs `src/lib/gear/calculations.test.ts` and all tests pass.
+
+Circumference and 90 rpm speed literals must match `Math.PI` (`2.1112` at 4 dp, `30.85` km/h at 2 dp), not the coarser-π values `2.1108` / `30.84`. If a copy fails for any other reason, fix the copy.
 
 Known assertions that must pass:
+
+- `wheelCircumferenceM(700×25)` ≈ `2.1112` (4 dp)
+- 90 rpm on 46/17 700×25c ≈ `30.85` km/h (2 dp)
 
 - `skidPatchCount(48, 16, true) === 1`
 - `skidPatchCount(46, 17, true) === 17`

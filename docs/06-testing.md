@@ -9,7 +9,7 @@ in `docs/08-seed-code.md`; extend it, don't replace it.
   - Known values: 48/16 on 700×25c → ratio 3.0, gear inches ≈ 79.37,
     development ≈ 6.33 m, gain ratio ≈ 5.93 (170 mm cranks)
   - Gain ratio differs for the same gear inches with 165 vs 175 cranks
-  - Speed: 90 rpm on 46/17 700×25c ≈ 30.84 km/h
+  - Speed: 90 rpm on 46/17 700×25c ≈ 30.85 km/h
   - Clamping: out-of-range teeth/tire clamp, never throw
   - `snapCrankMm`: 167.5 stays 167.5; 168 → 167.5; 168.75 (tie) → 170
   - `parseWheelSize`: `"650b"` ok; `"650c"` and garbage → `"700c"`

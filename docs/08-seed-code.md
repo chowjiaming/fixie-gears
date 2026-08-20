@@ -354,7 +354,7 @@ describe("wheels", () => {
   });
 
   it("computes circumference in meters", () => {
-    expect(wheelCircumferenceM(wheel700x25)).toBeCloseTo(2.1108, 4);
+    expect(wheelCircumferenceM(wheel700x25)).toBeCloseTo(2.1112, 4);
   });
 
   it("parses wheel size ids", () => {
@@ -380,7 +380,7 @@ describe("derived metrics", () => {
   it("computes speed at cadence for 46/17 on 700x25c", () => {
     const m = deriveMetrics(street);
     const row90 = m.speeds.find((r) => r.cadenceRpm === 90);
-    expect(row90?.speedKmh).toBeCloseTo(30.84, 2);
+    expect(row90?.speedKmh).toBeCloseTo(30.85, 2);
     expect(row90?.speedMph).toBeCloseTo(19.17, 2);
   });
 

@@ -1,5 +1,5 @@
 {
-  "name": "example-bare",
+  "name": "fixie-gears",
   "version": "0.0.0",
   "description": "",
   "type": "module",
@@ -7,7 +7,9 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "license": "MIT",
   "devDependencies": {
@@ -15,6 +17,7 @@
     "@solidjs/vite-plugin": "^3.0.0-next.29",
     "@tanstack/router-plugin": "^1.168.34",
     "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.11"
