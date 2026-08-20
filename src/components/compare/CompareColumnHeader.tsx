@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js";
+import { Button } from "~/components/ui/Button";
 import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { ToothInput } from "~/components/ui/ToothInput";
 import { ALLOWED_CRANKS_MM, snapCrankMm } from "~/lib/gear/calculations";
@@ -9,7 +10,7 @@ import type { CalculatorSearch } from "~/lib/search";
 const WHEEL_IDS: WheelSizeId[] = ["700c", "650b", "26in"];
 
 const selectClass =
-  "w-full rounded border border-ink/20 bg-transparent px-2 py-1 text-sm dark:border-paper/20";
+  "focus-ring w-full rounded border border-ink/20 bg-transparent px-2 py-1 text-sm dark:border-paper/20";
 
 export interface CompareColumnHeaderProps {
   index: number;
@@ -27,14 +28,14 @@ export function CompareColumnHeader(props: CompareColumnHeaderProps) {
     <fieldset class="flex min-w-[11rem] flex-col gap-2 text-left">
       <legend class="mb-1 w-full font-medium">{title()}</legend>
       <Show when={props.removable}>
-        <button
-          type="button"
-          class="self-start text-xs underline opacity-70 hover:text-accent hover:opacity-100"
-          aria-label={`Remove setup ${props.index}`}
-          onClick={() => props.onRemove()}
-        >
-          Remove
-        </button>
+        <span class="self-start">
+          <Button
+            ariaLabel={`Remove setup ${props.index}`}
+            onClick={() => props.onRemove()}
+          >
+            Remove
+          </Button>
+        </span>
       </Show>
       <ToothInput
         compact
@@ -102,7 +103,7 @@ export function CompareColumnHeader(props: CompareColumnHeaderProps) {
       <label class="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
-          class="accent-accent"
+          class="focus-ring accent-accent"
           aria-label="Ambidextrous skidder"
           checked={props.bike.ambi === 1}
           onChange={(e) =>

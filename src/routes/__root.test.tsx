@@ -41,6 +41,22 @@ async function renderAt(path: string) {
 }
 
 describe("root nav search", () => {
+  it("puts a skip link first and points it at main", async () => {
+    const { getByRole } = await renderAt("/");
+    const skip = getByRole("link", { name: /skip to (main )?content/i });
+    expect(skip.getAttribute("href")).toBe("#main");
+    // first focusable element in the document order
+    const focusables = host!.querySelectorAll("a, button, input");
+    expect(focusables[0]).toBe(skip);
+    expect(host!.querySelector("#main")).toBeTruthy();
+  });
+
+  it("makes the wordmark a link home that keeps the setup", async () => {
+    const { getByRole } = await renderAt("/?chainring=46&cog=17");
+    const home = getByRole("link", { name: "Fixie Gears" });
+    expect(home.getAttribute("href")).toContain("chainring=46");
+  });
+
   it("preserves calculator search keys from / to /explore", async () => {
     const { getByRole, testRouter } = await renderAt(
       "/?chainring=48&cog=16&wheel=650b",

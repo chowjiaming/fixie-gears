@@ -48,7 +48,7 @@ export function SkidSuggestions(props: SkidSuggestionsProps) {
               <li>
                 <button
                   type="button"
-                  class="w-full rounded border border-ink/15 px-3 py-2 text-left text-sm hover:border-accent dark:border-paper/20"
+                  class="focus-ring w-full rounded border border-ink/15 px-3 py-2 text-left text-sm hover:border-accent dark:border-paper/20"
                   aria-label={`Apply ${s().chainringTeeth}/${s().cogTeeth}, ${s().skidPatches} skid patches`}
                   onClick={() =>
                     props.onApply(s().chainringTeeth, s().cogTeeth)

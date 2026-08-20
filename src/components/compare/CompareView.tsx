@@ -1,5 +1,6 @@
 import { createMemo, createSignal, Show } from "solid-js";
 import { CompareTable } from "~/components/compare/CompareTable";
+import { Button } from "~/components/ui/Button";
 import {
   applySearchPatch,
   buildCompareColumns,
@@ -92,21 +93,9 @@ export function CompareView(props: CompareViewProps) {
       <div class="flex flex-wrap items-baseline justify-between gap-3">
         <h1 class="text-xl font-semibold">Compare</h1>
         <div class="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-            onClick={onSaveAll}
-          >
-            Save all
-          </button>
+          <Button onClick={onSaveAll}>Save all</Button>
           <Show when={columns().length < 4}>
-            <button
-              type="button"
-              class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-              onClick={onAdd}
-            >
-              Add column
-            </button>
+            <Button onClick={onAdd}>Add column</Button>
           </Show>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { createSignal, onSettled } from "solid-js";
+import { Button } from "~/components/ui/Button";
 
 export function CopyLinkButton() {
   const [copied, setCopied] = createSignal(false);
@@ -25,13 +26,8 @@ export function CopyLinkButton() {
   };
 
   return (
-    <button
-      type="button"
-      class="rounded border border-ink/15 px-2.5 py-1 text-sm hover:border-accent dark:border-paper/20"
-      aria-label="Copy link to this setup"
-      onClick={copy}
-    >
+    <Button ariaLabel="Copy link to this setup" onClick={copy}>
       {copied() ? "Copied" : "Copy link"}
-    </button>
+    </Button>
   );
 }
