@@ -44,6 +44,15 @@ function renderSaved(
   return renderUi(() => <SavedView search={search} onLoad={onLoad} />);
 }
 
+function seed(q: ReturnType<typeof renderSaved>, name: string): void {
+  fireEvent.input(q.getByLabelText("Name for current setup"), {
+    target: { value: name },
+  });
+  flush();
+  fireEvent.click(q.getByRole("button", { name: "Save current" }));
+  flush();
+}
+
 describe("SavedPage", () => {
   it("saves the current setup and still lists it after a storage reload", () => {
     const { getByLabelText, getByRole, getByText } = renderSaved();
@@ -138,5 +147,177 @@ describe("SavedPage", () => {
     expect(loaded[0]?.stay).toBe(405);
     expect(loaded[0]?.chainring).toBe(48);
     expect(loaded[0]?.cog).toBe(16);
+  });
+
+  it("requires confirmation before deleting", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    expect(q.queryByRole("button", { name: "Delete" })).toBeNull();
+    expect(q.getByRole("button", { name: "Confirm delete" })).toBeTruthy();
+    expect(q.getByRole("button", { name: "Cancel" })).toBeTruthy();
+    expect(q.getByRole("heading", { name: "Track" })).toBeTruthy();
+    expect(saved.setups).toHaveLength(1);
+  });
+
+  it("moves focus to Confirm delete when armed", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    const deleteButton = q.getByRole("button", { name: "Delete" });
+    deleteButton.focus();
+
+    fireEvent.click(deleteButton);
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Confirm delete" }),
+    );
+  });
+
+  it("returns focus to Delete when cancelled", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Cancel" }));
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Delete" }),
+    );
+  });
+
+  it("returns focus to Delete when dismissed with Escape", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.keyDown(q.getByRole("button", { name: "Confirm delete" }), {
+      key: "Escape",
+    });
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Delete" }),
+    );
+  });
+
+  it("moves focus to the list region after confirming with rows left", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    seed(q, "Street");
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    const list = q.getByRole("list");
+    expect(document.activeElement).toBe(list.parentElement);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
+  it("moves focus to the list region after confirming the last row", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    const fallback = q.getByText("No saved setups on this device.");
+    expect(document.activeElement).toBe(fallback.parentElement);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
+  it("announces the deleted setup by name", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    expect(host!.querySelector("[aria-live='polite']")?.textContent).toBe(
+      "Deleted “Track”.",
+    );
+  });
+
+  it("does not steal focus on initial render or when saving", () => {
+    const sentinel = document.createElement("button");
+    document.body.appendChild(sentinel);
+    sentinel.focus();
+
+    const q = renderSaved();
+    expect(document.activeElement).toBe(sentinel);
+
+    const nameInput = q.getByLabelText("Name for current setup");
+    nameInput.focus();
+    fireEvent.input(nameInput, { target: { value: "Track" } });
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Save current" }));
+    flush();
+
+    expect(document.activeElement).toBe(nameInput);
+    sentinel.remove();
+  });
+
+  it("deletes on confirm", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+    expect(q.queryByRole("heading", { name: "Track" })).toBeNull();
+    expect(saved.setups).toHaveLength(0);
+  });
+
+  it("disarms on cancel and on Escape", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Cancel" }));
+    flush();
+    expect(q.getByRole("button", { name: "Delete" })).toBeTruthy();
+
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.keyDown(q.getByRole("button", { name: "Confirm delete" }), {
+      key: "Escape",
+    });
+    flush();
+    expect(q.getByRole("button", { name: "Delete" })).toBeTruthy();
+    expect(saved.setups).toHaveLength(1);
+  });
+
+  it("arms only one row at a time", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    seed(q, "Street");
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+    expect(q.queryAllByRole("button", { name: "Confirm delete" })).toHaveLength(
+      1,
+    );
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Confirm delete" }),
+    );
+  });
+
+  it("keeps the bike name out of the visible Load label", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    expect(q.getByRole("button", { name: "Load Track" }).textContent).toBe(
+      "Load",
+    );
   });
 });

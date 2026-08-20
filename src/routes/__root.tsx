@@ -29,14 +29,29 @@ function RootLayout() {
 
   return (
     <>
+      <a
+        class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:border focus:border-accent focus:bg-paper focus:px-3 focus:py-2 focus:dark:bg-ink"
+        href="#main"
+      >
+        Skip to main content
+      </a>
       <header class="flex flex-wrap items-center gap-4 border-b border-ink/10 px-4 py-3 dark:border-paper/15">
-        <span class="font-semibold tracking-tight">Fixie Gears</span>
+        <Link
+          to="/"
+          search={bike}
+          class="focus-ring font-semibold tracking-tight"
+        >
+          Fixie Gears
+        </Link>
         <nav class="flex flex-wrap gap-4">
           <Link
             to="/"
             search={bike}
-            class="hover:text-accent"
-            activeProps={{ class: "text-accent" }}
+            class="focus-ring hover:text-accent-ink dark:hover:text-accent"
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Calculator
           </Link>
@@ -53,24 +68,33 @@ function RootLayout() {
                 }),
               };
             }}
-            class="hover:text-accent"
-            activeProps={{ class: "text-accent" }}
+            class="focus-ring hover:text-accent-ink dark:hover:text-accent"
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Compare
           </Link>
           <Link
             to="/explore"
             search={() => ({ ...bike(), ...parseExploreSearch(raw()) })}
-            class="hover:text-accent"
-            activeProps={{ class: "text-accent" }}
+            class="focus-ring hover:text-accent-ink dark:hover:text-accent"
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Explore
           </Link>
           <Link
             to="/saved"
             search={bike}
-            class="hover:text-accent"
-            activeProps={{ class: "text-accent" }}
+            class="focus-ring hover:text-accent-ink dark:hover:text-accent"
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Saved
           </Link>
@@ -81,7 +105,7 @@ function RootLayout() {
           <CopyLinkButton />
         </div>
       </header>
-      <main class="p-4">
+      <main id="main" class="p-4 sm:p-6" tabindex="-1">
         <Outlet />
       </main>
     </>

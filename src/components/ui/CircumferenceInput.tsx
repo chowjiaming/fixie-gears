@@ -32,7 +32,7 @@ export function CircumferenceInput(props: CircumferenceInputProps) {
         max={CIRC_MAX_MM}
         step={1}
         class={[
-          "rounded border border-ink/20 bg-transparent dark:border-paper/20",
+          "focus-ring rounded border border-ink/20 bg-transparent dark:border-paper/20",
           props.compact ? "w-full px-2 py-1 text-sm" : "px-2 py-1.5",
         ].join(" ")}
         aria-label="Measured circumference"

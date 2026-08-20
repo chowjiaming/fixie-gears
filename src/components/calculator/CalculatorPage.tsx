@@ -10,13 +10,16 @@ import { PresetChips } from "~/components/ui/PresetChips";
 import { ToothInput } from "~/components/ui/ToothInput";
 import {
   formatDevelopment,
+  formatDevelopmentSpoken,
   formatGain,
   formatGearInches,
+  formatGearInchesSpoken,
   formatRatio,
 } from "~/lib/format";
 import {
   ALLOWED_CRANKS_MM,
   clampInt,
+  MM_PER_INCH,
   snapCrankMm,
 } from "~/lib/gear/calculations";
 import { STAY_DEFAULT_MM, STAY_MAX_MM, STAY_MIN_MM } from "~/lib/gear/chain";
@@ -67,15 +70,31 @@ export function CalculatorView(props: {
     const n = props.search.circ;
     return n !== undefined ? tapedCircTip(n) : undefined;
   });
+  const announcement = createMemo(() => {
+    const currentMetrics = metrics();
+    const middle = metricHero()
+      ? `development ${formatDevelopmentSpoken(
+          currentMetrics.developmentMeters,
+        )}`
+      : formatGearInchesSpoken(currentMetrics.gearInches);
+    const patches =
+      currentMetrics.skidPatches === 1
+        ? "1 skid patch"
+        : `${currentMetrics.skidPatches} skid patches`;
+    return `Gear ratio ${formatRatio(currentMetrics.ratio)}, ${middle}, ${patches}`;
+  });
 
   return (
     <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+      <h1 class="sr-only">Calculator</h1>
       <aside>
         <details
           class="setup-inputs rounded-lg border border-ink/10 p-3 dark:border-paper/15 lg:border-0 lg:p-0"
           open
         >
-          <summary class="cursor-pointer font-medium lg:hidden">Inputs</summary>
+          <summary class="focus-ring cursor-pointer font-medium lg:hidden">
+            Inputs
+          </summary>
           <div class="mt-4 lg:mt-0">
             <SetupInputs bike={props.search} onPatch={props.onPatch} />
           </div>
@@ -120,9 +139,16 @@ export function CalculatorView(props: {
             label="Skid patches"
             value={String(metrics().skidPatches)}
             tooltip={SKID_TIP}
-            warning={metrics().skidPatches <= 2}
+            warning={
+              metrics().skidPatches <= 2
+                ? "Few skid patches — tire wear will concentrate."
+                : undefined
+            }
           />
         </div>
+        <p class="sr-only" aria-live="polite">
+          {announcement()}
+        </p>
 
         <div>
           <h2 class="mb-3 text-sm font-medium uppercase tracking-wide opacity-70">
@@ -161,6 +187,9 @@ function SetupInputs(props: {
   const wheel = createMemo(() => ({
     beadSeatDiameterMm: WHEEL_SIZES[props.bike.wheel].bsdMm,
     tireWidthMm: props.bike.tire,
+    ...(props.bike.circ !== undefined
+      ? { circumferenceMm: props.bike.circ }
+      : {}),
   }));
   const imperial = createMemo(() => prefs.units === "imperial");
 
@@ -183,7 +212,7 @@ function SetupInputs(props: {
       <label class="flex flex-col gap-1 text-sm">
         Wheel size
         <select
-          class="rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
+          class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
           aria-label="Wheel size"
           value={props.bike.wheel}
           onChange={(e) =>
@@ -211,7 +240,7 @@ function SetupInputs(props: {
       <label class="flex flex-col gap-1 text-sm">
         Crank length
         <select
-          class="rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
+          class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
           aria-label="Crank length"
           value={String(props.bike.crank)}
           onChange={(e) =>
@@ -238,7 +267,7 @@ function SetupInputs(props: {
       >
         <ToothInput
           label="Chainstay"
-          value={Number((props.bike.stay / 25.4).toFixed(1))}
+          value={Number((props.bike.stay / MM_PER_INCH).toFixed(1))}
           min={13.8}
           max={17.7}
           step={0.1}
@@ -246,7 +275,7 @@ function SetupInputs(props: {
           onChange={(inches) =>
             props.onPatch({
               stay: clampInt(
-                inches * 25.4,
+                inches * MM_PER_INCH,
                 STAY_MIN_MM,
                 STAY_MAX_MM,
                 STAY_DEFAULT_MM,
@@ -258,7 +287,7 @@ function SetupInputs(props: {
       <label class="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
-          class="accent-accent"
+          class="focus-ring accent-accent"
           aria-label="Ambidextrous skidder"
           checked={props.bike.ambi === 1}
           onChange={(e) =>

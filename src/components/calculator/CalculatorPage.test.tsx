@@ -52,7 +52,73 @@ function cardLabels(): string[] {
   );
 }
 
+function liveText(): string {
+  return host!.querySelector("[aria-live='polite']")?.textContent ?? "";
+}
+
 describe("CalculatorPage", () => {
+  it("has exactly one h1 and one live region", () => {
+    const { getByRole } = renderCalculator();
+    expect(getByRole("heading", { level: 1 })).toBeTruthy();
+    expect(host!.querySelectorAll("[aria-live]").length).toBe(1);
+  });
+
+  it("announces ratio, hero metric, and skid patches in metric", () => {
+    renderCalculator();
+    expect(liveText()).toBe(
+      "Gear ratio 2.71, development 5.71 meters, 17 skid patches",
+    );
+  });
+
+  it("swaps the middle clause to gear inches in imperial", () => {
+    const { getByRole } = renderCalculator();
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
+    flush();
+    expect(liveText()).toBe(
+      "Gear ratio 2.71, 71.6 gear inches, 17 skid patches",
+    );
+  });
+
+  it("says patch singular when there is one", () => {
+    renderCalculator(parseCalculatorSearch({ chainring: 48, cog: 16 }));
+    expect(liveText()).toContain("1 skid patch");
+    expect(liveText()).not.toContain("1 skid patches");
+  });
+
+  it("preset subtitles honor the taped circumference", () => {
+    const plain = renderCalculator(
+      parseCalculatorSearch({ chainring: 46, cog: 17 }),
+    );
+    const plainLabel = plain
+      .getAllByRole("button")
+      .map((button) => button.getAttribute("aria-label"))
+      .find((label) => label?.includes("″"));
+    dispose?.();
+    host?.remove();
+    const taped = renderCalculator(
+      parseCalculatorSearch({ chainring: 46, cog: 17, circ: 2200 }),
+    );
+    const tapedLabel = taped
+      .getAllByRole("button")
+      .map((button) => button.getAttribute("aria-label"))
+      .find((label) => label?.includes("″"));
+    expect(tapedLabel).not.toBe(plainLabel);
+  });
+
+  it("maps imperial chainstay through MM_PER_INCH", () => {
+    const { getByRole, search } = renderCalculator();
+    expect(search().stay).toBe(410); // 410 mm renders as 16.1 in
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
+    flush();
+    const input = getByRole("spinbutton", { name: "Chainstay value" });
+    // 16.5, not 16.1: ToothInput.commit returns early when the committed
+    // value equals props.value, so 16.1 would be a silent no-op.
+    fireEvent.change(input, { target: { value: "16.5" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search().stay).toBe(419); // clampInt rounds 16.5 × 25.4 = 419.1
+  });
+
   it("writes chainring into the navigate payload and updates metric cards", () => {
     const { getAllByRole, getByText, search } = renderCalculator();
     const before = deriveMetrics(toConfig(search()));
@@ -86,7 +152,7 @@ describe("CalculatorPage", () => {
     expect(cardLabels().slice(1, 3)).toEqual(["Development", "Gear inches"]);
     expect(getByText(/km\/h/)).toBeTruthy();
 
-    fireEvent.click(getByRole("button", { name: "Imperial" }));
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
     flush();
 
     expect(cardLabels().slice(1, 3)).toEqual(["Gear inches", "Development"]);
@@ -166,7 +232,7 @@ describe("CalculatorPage", () => {
     const { getByRole, getAllByRole, search } = renderCalculator(
       parseCalculatorSearch({ stay: 405 }),
     );
-    fireEvent.click(getByRole("button", { name: "Imperial" }));
+    fireEvent.click(getByRole("radio", { name: "Imperial" }));
     flush();
 
     const stepper = getAllByRole("spinbutton", {

@@ -1,5 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/solid-router";
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, flush, Show } from "solid-js";
+import { Button } from "~/components/ui/Button";
 import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
 import { deriveMetrics } from "~/lib/gear/calculations";
 import { WHEEL_SIZES } from "~/lib/gear/wheels";
@@ -63,10 +64,12 @@ export function SavedView(props: {
   const search = () => props.search;
   const [newName, setNewName] = createSignal("");
   const [editingId, setEditingId] = createSignal<string | undefined>();
+  const [armedId, setArmedId] = createSignal<string | undefined>(undefined);
   const [draftName, setDraftName] = createSignal("");
   const [status, setStatus] = createSignal<string | undefined>();
   const [error, setError] = createSignal<string | undefined>();
   let fileInput: HTMLInputElement | undefined;
+  let listRegion: HTMLDivElement | undefined;
 
   const currentConfig = () => toConfig(search());
 
@@ -94,6 +97,31 @@ export function SavedView(props: {
   const commitRename = (id: string) => {
     renameSetup(id, draftName());
     setEditingId(undefined);
+  };
+
+  const armDelete = (id: string, container: HTMLElement | undefined) => {
+    setArmedId(id);
+    flush();
+    container?.querySelector("button")?.focus();
+  };
+
+  const disarmDelete = (container: HTMLElement | undefined) => {
+    setArmedId(undefined);
+    flush();
+    container?.querySelector("button")?.focus();
+  };
+
+  // Confirming unmounts the row that held focus, and the whole list when it was
+  // the last row, so focus goes to the surrounding region rather than to any
+  // element that may not survive the delete.
+  const confirmDelete = (setup: SavedSetup) => {
+    const name = setup.name;
+    deleteSetup(setup.id);
+    setArmedId(undefined);
+    setError(undefined);
+    setStatus(`Deleted “${name}”.`);
+    flush();
+    listRegion?.focus();
   };
 
   const onExport = () => {
@@ -151,7 +179,7 @@ export function SavedView(props: {
         <label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
           Name
           <input
-            class="rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
+            class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
             name="name"
             autocomplete="off"
             placeholder={`${search().chainring}/${search().cog}`}
@@ -160,29 +188,12 @@ export function SavedView(props: {
             onInput={(e) => setNewName(e.currentTarget.value)}
           />
         </label>
-        <button
-          type="submit"
-          class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-        >
-          Save current
-        </button>
+        <Button type="submit">Save current</Button>
       </form>
 
       <div class="flex flex-wrap gap-2">
-        <button
-          type="button"
-          class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-          onClick={onExport}
-        >
-          Export
-        </button>
-        <button
-          type="button"
-          class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-          onClick={() => fileInput?.click()}
-        >
-          Import
-        </button>
+        <Button onClick={onExport}>Export</Button>
+        <Button onClick={() => fileInput?.click()}>Import</Button>
         <input
           ref={(el) => {
             fileInput = el;
@@ -200,7 +211,7 @@ export function SavedView(props: {
 
       <Show when={error()}>
         {(message) => (
-          <p class="text-sm text-accent" role="alert">
+          <p class="text-sm text-accent-ink dark:text-accent" role="alert">
             {message()}
           </p>
         )}
@@ -213,82 +224,117 @@ export function SavedView(props: {
         )}
       </Show>
 
-      <Show
-        when={saved.setups.length > 0}
-        fallback={
-          <p class="text-sm opacity-70">No saved setups on this device.</p>
-        }
+      <div
+        ref={(element) => {
+          listRegion = element;
+        }}
+        tabindex="-1"
       >
-        <ul class="flex flex-col gap-3">
-          <For each={saved.setups} keyed={(setup) => setup.id}>
-            {(setup) => {
-              return (
-                <li class="rounded-lg border border-ink/10 p-4 dark:border-paper/15">
-                  <div class="flex flex-wrap items-start justify-between gap-2">
-                    <Show
-                      when={editingId() === setup().id}
-                      fallback={
-                        <h2 class="text-base font-medium">{setup().name}</h2>
-                      }
-                    >
-                      <input
-                        class="rounded border border-ink/20 bg-transparent px-2 py-1 text-base dark:border-paper/20"
-                        aria-label={`Rename ${setup().name}`}
-                        value={draftName()}
-                        onInput={(e) => setDraftName(e.currentTarget.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            commitRename(setup().id);
-                          }
-                          if (e.key === "Escape") setEditingId(undefined);
+        <Show
+          when={saved.setups.length > 0}
+          fallback={
+            <p class="text-sm opacity-70">No saved setups on this device.</p>
+          }
+        >
+          <ul class="flex flex-col gap-3">
+            <For each={saved.setups} keyed={(setup) => setup.id}>
+              {(setup) => {
+                let deleteControl: HTMLDivElement | undefined;
+
+                return (
+                  <li class="rounded-lg border border-ink/10 p-4 dark:border-paper/15">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                      <Show
+                        when={editingId() === setup().id}
+                        fallback={
+                          <h2 class="text-base font-medium">{setup().name}</h2>
+                        }
+                      >
+                        <input
+                          class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1 text-base dark:border-paper/20"
+                          aria-label={`Rename ${setup().name}`}
+                          value={draftName()}
+                          onInput={(e) => setDraftName(e.currentTarget.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              commitRename(setup().id);
+                            }
+                            if (e.key === "Escape") setEditingId(undefined);
+                          }}
+                          onBlur={() => commitRename(setup().id)}
+                        />
+                      </Show>
+                      <time
+                        class="text-xs opacity-60"
+                        datetime={setup().savedAt}
+                      >
+                        {new Date(setup().savedAt).toLocaleString()}
+                      </time>
+                    </div>
+                    <p class="mt-1 font-mono text-sm tabular-nums opacity-80">
+                      {setupSummary(setup(), prefs.units)}
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        ariaLabel={`Load ${setup().name}`}
+                        onClick={() => load(setup())}
+                      >
+                        Load
+                      </Button>
+                      <Button onClick={() => startRename(setup())}>
+                        Rename
+                      </Button>
+                      <Button onClick={() => duplicateSetup(setup().id)}>
+                        Duplicate
+                      </Button>
+                      <div
+                        class="contents"
+                        ref={(element) => {
+                          deleteControl = element;
                         }}
-                        onBlur={() => commitRename(setup().id)}
-                      />
-                    </Show>
-                    <time class="text-xs opacity-60" datetime={setup().savedAt}>
-                      {new Date(setup().savedAt).toLocaleString()}
-                    </time>
-                  </div>
-                  <p class="mt-1 font-mono text-sm tabular-nums opacity-80">
-                    {setupSummary(setup(), prefs.units)}
-                  </p>
-                  <div class="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-                      onClick={() => load(setup())}
-                    >
-                      {`Load ${setup().name}`}
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-                      onClick={() => startRename(setup())}
-                    >
-                      Rename
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-                      onClick={() => duplicateSetup(setup().id)}
-                    >
-                      Duplicate
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-                      onClick={() => deleteSetup(setup().id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              );
-            }}
-          </For>
-        </ul>
-      </Show>
+                      >
+                        <Show
+                          when={armedId() === setup().id}
+                          fallback={
+                            <Button
+                              onClick={() =>
+                                armDelete(setup().id, deleteControl)
+                              }
+                            >
+                              Delete
+                            </Button>
+                          }
+                        >
+                          <fieldset
+                            class="contents"
+                            aria-label="Delete confirmation"
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") {
+                                disarmDelete(deleteControl);
+                              }
+                            }}
+                          >
+                            <Button
+                              variant="danger"
+                              onClick={() => confirmDelete(setup())}
+                            >
+                              Confirm delete
+                            </Button>
+                            <Button onClick={() => disarmDelete(deleteControl)}>
+                              Cancel
+                            </Button>
+                          </fieldset>
+                        </Show>
+                      </div>
+                    </div>
+                  </li>
+                );
+              }}
+            </For>
+          </ul>
+        </Show>
+      </div>
     </div>
   );
 }

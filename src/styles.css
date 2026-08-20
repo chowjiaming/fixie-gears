@@ -4,8 +4,19 @@
 
 @theme {
   --color-accent: #ff5a1f;
+  --color-accent-ink: #c2410c;
   --color-ink: #111214;
   --color-paper: #fafaf8;
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 2px;
+  }
+  &:where(.dark, .dark *):focus-visible {
+    outline-color: var(--color-accent);
+  }
 }
 
 .skid-marker {

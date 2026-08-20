@@ -209,7 +209,7 @@ export function CompareTable(props: CompareTableProps) {
                         )}
                       </Show>
                       <Show when={cell().best}>
-                        <span class="ml-2 text-xs font-medium text-accent">
+                        <span class="ml-2 text-xs font-medium text-accent-ink dark:text-accent">
                           <span aria-hidden="true">★ </span>
                           Best
                         </span>

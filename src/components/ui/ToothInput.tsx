@@ -55,7 +55,7 @@ export function ToothInput(props: ToothInputProps) {
             step={props.step ?? 1}
             value={props.value}
             aria-label={props.label}
-            class="min-w-0 flex-1 accent-accent"
+            class="focus-ring min-w-0 flex-1 accent-accent"
             onInput={(e) => commit(e.currentTarget.value)}
           />
         </Show>
@@ -67,7 +67,7 @@ export function ToothInput(props: ToothInputProps) {
           value={draft() ?? String(props.value)}
           aria-label={`${props.label} value`}
           class={[
-            "rounded border border-ink/20 bg-transparent px-2 py-1 text-right tabular-nums dark:border-paper/20",
+            "focus-ring rounded border border-ink/20 bg-transparent px-2 py-1 text-right tabular-nums dark:border-paper/20",
             props.compact ? "w-full" : "w-16",
           ]}
           onInput={(e) => setDraft(e.currentTarget.value)}
