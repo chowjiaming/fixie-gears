@@ -1,7 +1,8 @@
 {
   "name": "fixie-gears",
+  "private": true,
   "version": "0.0.0",
-  "description": "",
+  "description": "Street-fixie ratio calculator: gear inches, development, skid patches, chain links.",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -16,6 +17,10 @@
     "prepare": "lefthook install"
   },
   "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22.13.0",
+    "pnpm": ">=11"
+  },
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "2.5.9",
