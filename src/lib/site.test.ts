@@ -48,7 +48,13 @@ describe("crawler files", () => {
   it("lists the four routes and no query strings", () => {
     const text = readFileSync(join(publicDir, "sitemap.xml"), "utf8");
     expect(text.includes("<html")).toBe(false);
-    expect(text).not.toMatch(/\?/);
+    expect(text.startsWith("<?xml")).toBe(true);
+    const locUrls = [...text.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+      (match) => match[1],
+    );
+    for (const loc of locUrls) {
+      expect(loc).not.toContain("?");
+    }
     for (const route of SITE_ROUTES) {
       const loc = route === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
       expect(text).toContain(`<loc>${loc}</loc>`);
