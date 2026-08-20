@@ -47,6 +47,7 @@ function readInitial(): Prefs {
 export function isDarkTheme(theme: Theme): boolean {
   if (theme === "dark") return true;
   if (theme === "light") return false;
+  if (typeof window.matchMedia !== "function") return false;
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
@@ -70,6 +71,7 @@ export const [prefs, setPrefs] = createRoot(() => {
 
   onSettled(() => {
     if (typeof window === "undefined") return;
+    if (typeof window.matchMedia !== "function") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
       if (prefs.theme === "system") applyHtmlTheme("system");

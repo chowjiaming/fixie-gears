@@ -24,7 +24,9 @@ function renderUi(ui: () => JSX.Element) {
 }
 
 function patchCircles(container: HTMLElement): SVGCircleElement[] {
-  return [...container.querySelectorAll("circle[data-skid-patch]")];
+  return [
+    ...container.querySelectorAll<SVGCircleElement>("circle[data-skid-patch]"),
+  ];
 }
 
 describe("SkidVisualizer", () => {
@@ -72,7 +74,7 @@ describe("SkidVisualizer", () => {
     setConfig(toConfig(parseCalculatorSearch({ chainring: 48, cog: 16 })));
     flush();
 
-    const groups = [...host!.querySelectorAll("g.skid-marker")];
+    const groups = [...host!.querySelectorAll<SVGGElement>("g.skid-marker")];
     expect(groups).toHaveLength(17);
     expect(groups.filter((g) => g.style.opacity === "0")).toHaveLength(16);
     expect(groups.filter((g) => g.style.opacity === "1")).toHaveLength(1);

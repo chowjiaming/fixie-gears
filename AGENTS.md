@@ -35,6 +35,7 @@ files in `docs/` before writing code. Implement in this order:
 
 - [ ] `npm run dev` starts without errors
 - [ ] `npm run test` passes
+- [ ] `npm run typecheck` is clean
 - [ ] `npm run build` emits `dist/client`
 - [ ] No Solid 1.x APIs anywhere
       (`grep -r "createResource\|classList\|produce" src/`)

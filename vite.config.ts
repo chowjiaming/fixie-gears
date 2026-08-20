@@ -10,7 +10,13 @@ export default defineConfig({
   plugins: [
     ...(process.env.VITEST
       ? []
-      : [tanstackRouter({ target: "solid", autoCodeSplitting: true })]),
+      : [
+          tanstackRouter({
+            target: "solid",
+            autoCodeSplitting: true,
+            routeFileIgnorePattern: "\\.test\\.",
+          }),
+        ]),
     solid({ start: true }),
     tailwindcss(),
   ] satisfies PluginOption[],
