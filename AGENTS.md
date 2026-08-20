@@ -27,19 +27,21 @@ files in `docs/` before writing code. Implement in this order:
   mutate search state locally.
 - Calculator search params are global; navigating between routes must
   spread them. Do not claim offline-first in UI copy.
-- Format and lint with Biome (`npm run format` / `npm run check`). Print
+- Format and lint with Biome (`pnpm format` / `pnpm check`). Print
   width 80, 2-space indent. Lefthook runs Biome on commit and Biome plus
   typecheck on push.
-- Run `npm run test` after each milestone; do not proceed with failing
+- Run `pnpm test` after each milestone; do not proceed with failing
   tests.
+- Package manager is **pnpm**. Do not run `npm install` or commit a
+  `package-lock.json`.
 
 ## Verification checklist per milestone
 
-- [ ] `npm run dev` starts without errors
-- [ ] `npm run test` passes
-- [ ] `npm run check` is clean
-- [ ] `npm run typecheck` is clean
-- [ ] `npm run build` emits `dist/client`
+- [ ] `pnpm dev` starts without errors
+- [ ] `pnpm test` passes
+- [ ] `pnpm check` is clean
+- [ ] `pnpm typecheck` is clean
+- [ ] `pnpm build` emits `dist/client`
 - [ ] No Solid 1.x APIs anywhere
       (`grep -r "createResource\|classList\|produce" src/`)
 - [ ] `netlify.toml` present at repo root with SPA fallback redirect
@@ -50,7 +52,7 @@ files in `docs/` before writing code. Implement in this order:
   to the `2.0.0-rc.x` line (Solid 2.0-compatible). The `latest` dist-tag
   (1.x) peers on solid-js ^1.x and MUST NOT be installed.
 - `@tanstack/router-plugin` stays on latest 1.x.
-- `solid-js` / `@solidjs/web` versions are enforced via package.json
-  `overrides`. Do not remove them.
-- Never run `npm update` on TanStack packages without checking peer ranges
+- `solid-js` / `@solidjs/web` are pinned to `2.0.0-rc.1` and re-enforced
+  via package.json `overrides`. Do not remove them.
+- Never run `pnpm update` on TanStack packages without checking peer ranges
   against the installed solid-js version first.

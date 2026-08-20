@@ -1,7 +1,7 @@
 # Seed Code — `src/lib/gear/`
 
 Reference implementation of the pure math layer. Copy these files verbatim,
-run `npm run test`, and confirm green before building any UI.
+run `pnpm test`, and confirm green before building any UI.
 
 ## `src/lib/gear/types.ts`
 

@@ -88,5 +88,5 @@ columns and Explore includes the heatmap view state.
 
 - `vite dev` — dev server (start mode owns entries; no `index.html` needed)
 - `vite build` — static `dist/client`
-- Netlify: build command `npm run build`, publish `dist/client`, SPA fallback
+- Netlify: build command `pnpm run build`, publish `dist/client`, SPA fallback
   via `netlify.toml` redirects. No router basepath; the site serves from `/`.

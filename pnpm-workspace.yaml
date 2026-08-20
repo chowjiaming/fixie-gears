@@ -1,0 +1,7 @@
+# Settings only — this is not a monorepo.
+# Lefthook's postinstall fetches the native binary the hooks invoke.
+allowBuilds:
+  lefthook: true
+# Match npm's "latest version in range" so RC and next tags are not
+# delayed by pnpm's default release-age gate.
+minimumReleaseAge: 0
