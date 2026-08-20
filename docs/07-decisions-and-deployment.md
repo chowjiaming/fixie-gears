@@ -10,9 +10,11 @@ stable peers on solid-js ^1.x; Ark UI deferred to post-RC).
   `details`, `dialog`) styled with Tailwind 4.
 - Wrap each in `src/components/ui/` so a future Kobalte 2.0 migration
   touches only wrapper internals.
-- Add ARIA attributes manually: `aria-label` on all inputs, `role="img"`
-  - `aria-label` on the skid visualizer SVG, `aria-live="polite"` on
-    metric value regions.
+- Add ARIA attributes manually: `aria-label` on all inputs, and
+  `role="img"` plus `aria-label` on the skid visualizer SVG. Announcing
+  a changed value is a page-level job rather than a component one — `/`
+  carries a single `sr-only` `aria-live="polite"` region and the metric
+  cards are silent (see `docs/05-ui-design.md`).
 
 ## Form library decision (ADR-002)
 
@@ -93,3 +95,49 @@ three. One-column compare is not a product.
 
 Column 1 is a live alias of the global search, not a snapshot. Stay is
 URL-only (not in tuples or saved setups).
+
+## Accent-ink token (ADR-008)
+
+Two oranges exist because one cannot do both jobs. The brand accent
+`#FF5A1F` measures **2.98:1** on paper `#FAFAF8`, well under WCAG AA's
+4.5:1 floor for body text, so every accent-colored warning and badge in
+light mode failed. `#C2410C` measures **4.95:1** on the same paper, and
+the brand orange already measures **6.01:1** on ink `#111214`.
+
+- `--color-accent` (`#FF5A1F`) stays the fill, border, and graphic
+  color, unchanged.
+- `--color-accent-ink` (`#C2410C`) is accent as *text or outline* on
+  paper. Accent-as-text is always written
+  `text-accent-ink dark:text-accent`, so dark mode keeps the brand
+  orange.
+- Text on an accent fill is `text-ink`. That pairing is mode-independent
+  because the fill color does not change between themes.
+- Rejected: darkening the brand accent everywhere. It changes the fill
+  identity of the whole app to fix a text problem, and the fill already
+  passes.
+- Rejected: keeping `text-paper` on accent fills. That pairing is the
+  same 2.98:1 — it is the bug, not an alternative to it.
+- Heatmap cell fills are data visualization rather than text and stay
+  outside the rule. `src/lib/design-contracts.test.ts` enforces the rest
+  repo-wide.
+
+## No ARIA grid roles on the heatmap (ADR-009)
+
+`/explore` renders 23 chainrings × 13 cogs as 299 buttons. Roving
+tabindex turns 299 tab stops into one, which is the whole keyboard win.
+`role="grid"` / `role="row"` / `role="gridcell"` were considered
+alongside it and deliberately left out.
+
+- Each cog row is wrapped in a `display: contents` div, which flattens
+  out of the layout exactly the DOM structure those roles describe.
+  Adding them would publish an ARIA tree that misdescribes the markup —
+  worse than no roles, because assistive technology would trust it.
+- Restructuring the grid so the roles would be honest is a larger change
+  than a presentation pass warrants. It is deferred, not rejected.
+- Restructuring would unlock `aria-rowindex` / `aria-colindex` on every
+  move, `role="columnheader"` and `role="rowheader"` for the ring and
+  cog labels that are currently `aria-hidden`, and the grid pattern's
+  own conventions such as Ctrl+Home to the first cell.
+- Until then every cell keeps its full `aria-label` ("46 tooth
+  chainring, 17 tooth cog, 71.6 gear inches"), so only the positional
+  shorthand is missing.
