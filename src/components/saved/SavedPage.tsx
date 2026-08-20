@@ -1,5 +1,5 @@
 import { useNavigate, useSearch } from "@tanstack/solid-router";
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, flush, Show } from "solid-js";
 import { Button } from "~/components/ui/Button";
 import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
 import { deriveMetrics } from "~/lib/gear/calculations";
@@ -96,6 +96,18 @@ export function SavedView(props: {
   const commitRename = (id: string) => {
     renameSetup(id, draftName());
     setEditingId(undefined);
+  };
+
+  const armDelete = (id: string, container: HTMLElement | undefined) => {
+    setArmedId(id);
+    flush();
+    container?.querySelector("button")?.focus();
+  };
+
+  const disarmDelete = (container: HTMLElement | undefined) => {
+    setArmedId(undefined);
+    flush();
+    container?.querySelector("button")?.focus();
   };
 
   const onExport = () => {
@@ -207,6 +219,8 @@ export function SavedView(props: {
         <ul class="flex flex-col gap-3">
           <For each={saved.setups} keyed={(setup) => setup.id}>
             {(setup) => {
+              let deleteControl: HTMLSpanElement | undefined;
+
               return (
                 <li class="rounded-lg border border-ink/10 p-4 dark:border-paper/15">
                   <div class="flex flex-wrap items-start justify-between gap-2">
@@ -249,35 +263,46 @@ export function SavedView(props: {
                     <Button onClick={() => duplicateSetup(setup().id)}>
                       Duplicate
                     </Button>
-                    <Show
-                      when={armedId() === setup().id}
-                      fallback={
-                        <Button onClick={() => setArmedId(setup().id)}>
-                          Delete
-                        </Button>
-                      }
+                    <span
+                      class="contents"
+                      ref={(element) => {
+                        deleteControl = element;
+                      }}
                     >
-                      <fieldset
-                        class="contents"
-                        aria-label="Delete confirmation"
-                        onKeyDown={(event) => {
-                          if (event.key === "Escape") setArmedId(undefined);
-                        }}
+                      <Show
+                        when={armedId() === setup().id}
+                        fallback={
+                          <Button
+                            onClick={() => armDelete(setup().id, deleteControl)}
+                          >
+                            Delete
+                          </Button>
+                        }
                       >
-                        <Button
-                          variant="danger"
-                          onClick={() => {
-                            deleteSetup(setup().id);
-                            setArmedId(undefined);
+                        <fieldset
+                          class="contents"
+                          aria-label="Delete confirmation"
+                          onKeyDown={(event) => {
+                            if (event.key === "Escape") {
+                              disarmDelete(deleteControl);
+                            }
                           }}
                         >
-                          Confirm delete
-                        </Button>
-                        <Button onClick={() => setArmedId(undefined)}>
-                          Cancel
-                        </Button>
-                      </fieldset>
-                    </Show>
+                          <Button
+                            variant="danger"
+                            onClick={() => {
+                              deleteSetup(setup().id);
+                              setArmedId(undefined);
+                            }}
+                          >
+                            Confirm delete
+                          </Button>
+                          <Button onClick={() => disarmDelete(deleteControl)}>
+                            Cancel
+                          </Button>
+                        </fieldset>
+                      </Show>
+                    </span>
                   </div>
                 </li>
               );

@@ -161,6 +161,69 @@ describe("SavedPage", () => {
     expect(saved.setups).toHaveLength(1);
   });
 
+  it("moves focus to Confirm delete when armed", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    const deleteButton = q.getByRole("button", { name: "Delete" });
+    deleteButton.focus();
+
+    fireEvent.click(deleteButton);
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Confirm delete" }),
+    );
+  });
+
+  it("returns focus to Delete when cancelled", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Cancel" }));
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Delete" }),
+    );
+  });
+
+  it("returns focus to Delete when dismissed with Escape", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.keyDown(q.getByRole("button", { name: "Confirm delete" }), {
+      key: "Escape",
+    });
+    flush();
+
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Delete" }),
+    );
+  });
+
+  it("does not steal focus on initial render or when saving", () => {
+    const sentinel = document.createElement("button");
+    document.body.appendChild(sentinel);
+    sentinel.focus();
+
+    const q = renderSaved();
+    expect(document.activeElement).toBe(sentinel);
+
+    const nameInput = q.getByLabelText("Name for current setup");
+    nameInput.focus();
+    fireEvent.input(nameInput, { target: { value: "Track" } });
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Save current" }));
+    flush();
+
+    expect(document.activeElement).toBe(nameInput);
+    sentinel.remove();
+  });
+
   it("deletes on confirm", () => {
     const q = renderSaved();
     seed(q, "Track");
@@ -201,6 +264,9 @@ describe("SavedPage", () => {
     flush();
     expect(q.queryAllByRole("button", { name: "Confirm delete" })).toHaveLength(
       1,
+    );
+    expect(document.activeElement).toBe(
+      q.getByRole("button", { name: "Confirm delete" }),
     );
   });
 
