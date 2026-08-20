@@ -3,6 +3,7 @@ export type WheelSizeId = "700c" | "650b" | "26in";
 export interface WheelSpec {
   beadSeatDiameterMm: number;
   tireWidthMm: number;
+  circumferenceMm?: number;
 }
 
 export interface DrivetrainConfig {

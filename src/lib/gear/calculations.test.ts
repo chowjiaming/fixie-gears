@@ -75,6 +75,22 @@ describe("derived metrics", () => {
     expect(row90?.speedMph).toBeCloseTo(19.17, 2);
   });
 
+  it("uses taped circumference when set", () => {
+    const taped = {
+      ...street,
+      wheel: { ...wheel700x25, circumferenceMm: 2130 },
+    };
+    const unset = deriveMetrics(street);
+    const set = deriveMetrics(taped);
+    expect(set.developmentMeters).toBeCloseTo((46 / 17) * 2.13, 5);
+    expect(set.wheelDiameterMm).toBeCloseTo(2130 / Math.PI, 5);
+    expect(set.skidPatches).toBe(unset.skidPatches);
+    expect(set.developmentMeters).not.toBeCloseTo(
+      unset.developmentMeters,
+      5,
+    );
+  });
+
   it("emits one speed row per standard cadence", () => {
     const m = deriveMetrics(street);
     expect(m.speeds.map((r) => r.cadenceRpm)).toEqual(STANDARD_CADENCES);

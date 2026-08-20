@@ -1,3 +1,4 @@
+import { CIRC_MAX_MM, CIRC_MIN_MM } from "./chain";
 import type { WheelSizeId, WheelSpec } from "./types";
 
 export const WHEEL_SIZES: Record<
@@ -16,10 +17,27 @@ export function parseWheelSize(value: unknown): WheelSizeId {
   return "700c";
 }
 
+function measuredCircumferenceMm(wheel: WheelSpec): number | undefined {
+  const n = wheel.circumferenceMm;
+  if (
+    typeof n !== "number" ||
+    !Number.isInteger(n) ||
+    n < CIRC_MIN_MM ||
+    n > CIRC_MAX_MM
+  ) {
+    return undefined;
+  }
+  return n;
+}
+
 export function wheelDiameterMm(wheel: WheelSpec): number {
+  const circ = measuredCircumferenceMm(wheel);
+  if (circ !== undefined) return circ / Math.PI;
   return wheel.beadSeatDiameterMm + 2 * wheel.tireWidthMm;
 }
 
 export function wheelCircumferenceM(wheel: WheelSpec): number {
+  const circ = measuredCircumferenceMm(wheel);
+  if (circ !== undefined) return circ / 1000;
   return (Math.PI * wheelDiameterMm(wheel)) / 1000;
 }
