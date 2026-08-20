@@ -35,7 +35,6 @@ const SKID_TIP =
 export function CalculatorPage() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
-  const { config, metrics } = useCurrentSetup(search);
 
   const patch = (partial: Partial<CalculatorSearch>) => {
     void navigate({
@@ -44,6 +43,14 @@ export function CalculatorPage() {
     });
   };
 
+  return <CalculatorView search={search()} onPatch={patch} />;
+}
+
+export function CalculatorView(props: {
+  search: CalculatorSearch;
+  onPatch: (partial: Partial<CalculatorSearch>) => void;
+}) {
+  const { config, metrics } = useCurrentSetup(() => props.search);
   const metricHero = createMemo(() => prefs.units === "metric");
 
   return (
@@ -55,12 +62,12 @@ export function CalculatorPage() {
         >
           <summary class="cursor-pointer font-medium">Inputs</summary>
           <div class="mt-4">
-            <SetupInputs bike={search()} onPatch={patch} />
+            <SetupInputs bike={props.search} onPatch={props.onPatch} />
           </div>
         </details>
       </div>
       <aside class="hidden lg:block">
-        <SetupInputs bike={search()} onPatch={patch} />
+        <SetupInputs bike={props.search} onPatch={props.onPatch} />
       </aside>
 
       <section class="flex flex-col gap-8">
@@ -116,7 +123,7 @@ export function CalculatorPage() {
             <SkidVisualizer config={config()} />
             <SkidSuggestions
               config={config()}
-              onApply={(chainring, cog) => patch({ chainring, cog })}
+              onApply={(chainring, cog) => props.onPatch({ chainring, cog })}
             />
           </div>
         </div>

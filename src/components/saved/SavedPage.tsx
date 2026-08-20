@@ -3,7 +3,7 @@ import { useNavigate, useSearch } from "@tanstack/solid-router";
 import { deriveMetrics } from "~/lib/gear/calculations";
 import { WHEEL_SIZES } from "~/lib/gear/wheels";
 import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
-import { fromConfig, toConfig } from "~/lib/search";
+import { fromConfig, toConfig, type CalculatorSearch } from "~/lib/search";
 import { prefs, type Units } from "~/lib/state/prefs-store";
 import {
   deleteSetup,
@@ -36,6 +36,21 @@ function setupSummary(setup: SavedSetup, units: Units): string {
 export function SavedPage() {
   const search = useSearch({ from: "/saved" });
   const go = useNavigate();
+  return (
+    <SavedView
+      search={search()}
+      onLoad={(bike) => {
+        void go({ to: "/", search: bike });
+      }}
+    />
+  );
+}
+
+export function SavedView(props: {
+  search: CalculatorSearch;
+  onLoad: (bike: CalculatorSearch) => void;
+}) {
+  const search = () => props.search;
   const [newName, setNewName] = createSignal("");
   const [editingId, setEditingId] = createSignal<string | undefined>();
   const [draftName, setDraftName] = createSignal("");
@@ -58,7 +73,7 @@ export function SavedPage() {
   };
 
   const load = (setup: SavedSetup) => {
-    void go({ to: "/", search: fromConfig(setup.config) });
+    props.onLoad(fromConfig(setup.config));
   };
 
   const startRename = (setup: SavedSetup) => {
