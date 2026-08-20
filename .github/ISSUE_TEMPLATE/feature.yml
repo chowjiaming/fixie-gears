@@ -1,0 +1,21 @@
+name: Feature
+description: A job the calculator does not cover yet
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: The job to be done
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why the current app does not cover it
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: >
+        Geared/derailleur drivetrains and a backend are non-goals.
+        See docs/00-project-overview.md.

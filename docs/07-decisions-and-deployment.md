@@ -165,3 +165,16 @@ lock went stale (it never listed Biome, Lefthook, or TanStack).
   `package-lock.json` is also present — do not re-add one).
 - `overrides` stays on `package.json` (ADR-004); pnpm honors that field.
 
+## Public repository (ADR-011)
+
+The app is a public resource, not an npm package.
+
+- MIT at repo root (`LICENSE`), copyright 2026 chowjiaming, so GitHub
+  detects the license. `package.json` stays `"license": "MIT"` and
+  `"private": true` to block accidental publish.
+- Visitor docs live in `README.md`. Engineering docs live in `docs/`.
+  Do not duplicate domain math into the README.
+- CI is GitHub Actions (`.github/workflows/ci.yml`). Deploy remains
+  Netlify (`netlify.toml`). Package manager is pnpm, not Corepack
+  (ADR-010).
+
