@@ -48,7 +48,10 @@ function RootLayout() {
             to="/"
             search={bike}
             class="focus-ring hover:text-accent-ink dark:hover:text-accent"
-            activeProps={{ class: "text-accent-ink dark:text-accent" }}
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Calculator
           </Link>
@@ -66,7 +69,10 @@ function RootLayout() {
               };
             }}
             class="focus-ring hover:text-accent-ink dark:hover:text-accent"
-            activeProps={{ class: "text-accent-ink dark:text-accent" }}
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Compare
           </Link>
@@ -74,7 +80,10 @@ function RootLayout() {
             to="/explore"
             search={() => ({ ...bike(), ...parseExploreSearch(raw()) })}
             class="focus-ring hover:text-accent-ink dark:hover:text-accent"
-            activeProps={{ class: "text-accent-ink dark:text-accent" }}
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Explore
           </Link>
@@ -82,7 +91,10 @@ function RootLayout() {
             to="/saved"
             search={bike}
             class="focus-ring hover:text-accent-ink dark:hover:text-accent"
-            activeProps={{ class: "text-accent-ink dark:text-accent" }}
+            activeProps={{
+              class:
+                "text-accent-ink underline underline-offset-4 dark:text-accent",
+            }}
           >
             Saved
           </Link>
