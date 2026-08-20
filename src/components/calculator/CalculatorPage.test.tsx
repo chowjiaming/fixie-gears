@@ -7,7 +7,11 @@ import { CalculatorView } from "~/components/calculator/CalculatorPage";
 import { UnitToggle } from "~/components/ui/UnitToggle";
 import { deriveMetrics } from "~/lib/gear/calculations";
 import { formatDevelopment, formatGearInches, formatRatio } from "~/lib/format";
-import { parseCalculatorSearch, toConfig } from "~/lib/search";
+import {
+  applySearchPatch,
+  parseCalculatorSearch,
+  toConfig,
+} from "~/lib/search";
 import { setUnits } from "~/lib/state/prefs-store";
 
 let dispose: (() => void) | undefined;
@@ -35,7 +39,7 @@ function renderCalculator(initial = parseCalculatorSearch({})) {
       <UnitToggle />
       <CalculatorView
         search={search()}
-        onPatch={(partial) => setSearch({ ...search(), ...partial })}
+        onPatch={(partial) => setSearch(applySearchPatch(search(), partial))}
       />
     </>
   ));
@@ -87,5 +91,24 @@ describe("CalculatorPage", () => {
 
     expect(cardLabels().slice(1, 3)).toEqual(["Gear inches", "Development"]);
     expect(getByText(/mph/)).toBeTruthy();
+  });
+
+  it("shows 98 links and the half-link warning on the default bike", () => {
+    const { getByText } = renderCalculator();
+    expect(getByText("98 links")).toBeTruthy();
+    expect(getByText(/won’t tension well/i)).toBeTruthy();
+    expect(getByText(/97 with a half-link/)).toBeTruthy();
+  });
+
+  it("omits circ from search when the circumference field is cleared", () => {
+    const { getByRole, search } = renderCalculator(
+      parseCalculatorSearch({ circ: 2130 }),
+    );
+    const input = getByRole("spinbutton", {
+      name: "Measured circumference",
+    });
+    fireEvent.change(input, { target: { value: "" } });
+    flush();
+    expect(search()).not.toHaveProperty("circ");
   });
 });
