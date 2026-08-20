@@ -56,12 +56,54 @@ describe("ToothInput", () => {
     expect(slider.value).toBe("48");
     expect(stepper.value).toBe("48");
 
-    fireEvent.input(stepper, { target: { value: "50" } });
+    fireEvent.change(stepper, { target: { value: "50" } });
+    fireEvent.blur(stepper);
     flush();
 
     expect(onChange).toHaveBeenCalledTimes(2);
     expect(onChange).toHaveBeenLastCalledWith(50);
     expect(slider.value).toBe("50");
     expect(stepper.value).toBe("50");
+  });
+
+  it("does not clamp a partial multi-digit stepper value until blur", () => {
+    const onChange = vi.fn();
+    const { getByRole } = renderUi(() => {
+      const [value, setValue] = createSignal(17);
+      return (
+        <ToothInput
+          label="Cog teeth"
+          value={value()}
+          min={9}
+          max={30}
+          onChange={(n) => {
+            onChange(n);
+            setValue(n);
+          }}
+        />
+      );
+    });
+
+    const stepper = getByRole("spinbutton", {
+      name: "Cog teeth value",
+    }) as HTMLInputElement;
+
+    fireEvent.input(stepper, { target: { value: "1" } });
+    flush();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(stepper.value).toBe("1");
+
+    fireEvent.input(stepper, { target: { value: "14" } });
+    flush();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(stepper.value).toBe("14");
+
+    fireEvent.change(stepper, { target: { value: "14" } });
+    fireEvent.blur(stepper);
+    flush();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(14);
+    expect(stepper.value).toBe("14");
   });
 });

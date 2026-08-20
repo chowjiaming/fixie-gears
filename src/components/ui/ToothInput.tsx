@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 export interface ToothInputProps {
   label: string;
@@ -12,13 +12,24 @@ export interface ToothInputProps {
 }
 
 export function ToothInput(props: ToothInputProps) {
+  const [draft, setDraft] = createSignal<string | undefined>(undefined);
+  let lastSent: number | undefined;
+
   const commit = (raw: string) => {
+    setDraft(undefined);
+    if (raw.trim() === "") return;
     const n = Number(raw);
     if (!Number.isFinite(n)) return;
     const step = props.step ?? 1;
     const rounded = Math.round(n / step) * step;
     const next = Math.min(props.max, Math.max(props.min, rounded));
-    if (next !== props.value) props.onChange(next);
+    if (next === props.value) {
+      lastSent = next;
+      return;
+    }
+    if (lastSent !== undefined && next === lastSent) return;
+    lastSent = next;
+    props.onChange(next);
   };
 
   return (
@@ -53,13 +64,15 @@ export function ToothInput(props: ToothInputProps) {
           min={props.min}
           max={props.max}
           step={props.step ?? 1}
-          value={props.value}
+          value={draft() ?? String(props.value)}
           aria-label={`${props.label} value`}
           class={[
             "rounded border border-ink/20 bg-transparent px-2 py-1 text-right tabular-nums dark:border-paper/20",
             props.compact ? "w-full" : "w-16",
           ]}
-          onInput={(e) => commit(e.currentTarget.value)}
+          onInput={(e) => setDraft(e.currentTarget.value)}
+          onChange={(e) => commit(e.currentTarget.value)}
+          onBlur={(e) => commit(e.currentTarget.value)}
         />
       </div>
     </div>

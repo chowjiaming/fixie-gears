@@ -73,6 +73,10 @@ describe("CompareView", () => {
       getAllByRole("spinbutton", { name: "Chainring value" })[0]!,
       { target: { value: "48" } },
     );
+    fireEvent.change(
+      getAllByRole("spinbutton", { name: "Chainring value" })[0]!,
+      { target: { value: "48" } },
+    );
     flush();
 
     expect(search().chainring).toBe(48);

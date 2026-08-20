@@ -46,7 +46,7 @@ describe("CompareColumnHeader", () => {
       getByRole("checkbox", { name: "Ambidextrous skidder" }),
     ).toBeTruthy();
 
-    fireEvent.input(getByRole("spinbutton", { name: "Cog value" }), {
+    fireEvent.change(getByRole("spinbutton", { name: "Cog value" }), {
       target: { value: "18" },
     });
     flush();
