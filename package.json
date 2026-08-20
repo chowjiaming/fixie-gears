@@ -1,0 +1,34 @@
+{
+  "name": "example-bare",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@solidjs/testing-library": "^0.8.10",
+    "@solidjs/vite-plugin": "^3.0.0-next.29",
+    "@tanstack/router-plugin": "^1.168.34",
+    "jsdom": "^30.0.1",
+    "typescript": "^5.9.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "@solidjs/web": "^2.0.0-rc.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/solid-router": "^2.0.0-rc.1",
+    "@tanstack/solid-router-devtools": "^2.0.0-rc.1",
+    "solid-js": "^2.0.0-rc.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "overrides": {
+    "solid-js": "$solid-js",
+    "@solidjs/web": "$@solidjs/web"
+  }
+}
