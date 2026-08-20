@@ -9,6 +9,7 @@ import { parseCalculatorSearch, toConfig } from "~/lib/search";
 import {
   buildHeatmapCells,
   buildHeatmapScale,
+  HEATMAP_COG_MAX,
   HEATMAP_COG_MIN,
   HEATMAP_COGS,
   HEATMAP_RING_MAX,
@@ -247,6 +248,40 @@ describe("heatmap roving tabindex", () => {
     fireEvent.keyDown(document.activeElement!, { key: "ArrowUp" });
     flush();
     expect(focusedKey()).toBe(`${HEATMAP_RING_MIN}/${HEATMAP_COG_MIN}`);
+  });
+
+  it("clamps at the far edges too", () => {
+    renderGrid(
+      parseCalculatorSearch({
+        chainring: HEATMAP_RING_MAX,
+        cog: HEATMAP_COG_MAX,
+      }),
+    );
+    const last = cellAt(`${HEATMAP_RING_MAX}/${HEATMAP_COG_MAX}`);
+    last?.focus();
+    fireEvent.keyDown(last!, { key: "ArrowRight" });
+    flush();
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    flush();
+    expect(focusedKey()).toBe(`${HEATMAP_RING_MAX}/${HEATMAP_COG_MAX}`);
+  });
+
+  // Without the modifier guard the arrow handler would preventDefault on
+  // ⌘←/Alt+←, swallowing browser Back for anyone parked in the grid.
+  it("leaves modified arrows to the browser", () => {
+    renderGrid(parseCalculatorSearch({ chainring: 46, cog: 17 }));
+    const cell = cellAt("46/17");
+    cell?.focus();
+    const back = new KeyboardEvent("keydown", {
+      key: "ArrowLeft",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    cell?.dispatchEvent(back);
+    flush();
+    expect(back.defaultPrevented).toBe(false);
+    expect(focusedKey()).toBe("46/17");
   });
 
   it("jumps to row ends with Home and End", () => {
