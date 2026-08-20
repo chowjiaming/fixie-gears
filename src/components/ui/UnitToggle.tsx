@@ -23,7 +23,7 @@ export function UnitToggle() {
                 "bg-accent text-paper": prefs.units === option().id,
               },
             ]}
-            aria-pressed={prefs.units === option().id}
+            aria-pressed={prefs.units === option().id ? "true" : "false"}
             onClick={() => setUnits(option().id)}
           >
             {option().label}

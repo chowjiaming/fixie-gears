@@ -1,4 +1,5 @@
-import { createSignal, Show, type JSX } from "solid-js";
+import { createSignal, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 export interface TooltipProps {
   id: string;
@@ -14,9 +15,12 @@ export function Tooltip(props: TooltipProps) {
         type="button"
         class="grid h-6 w-6 place-items-center rounded-full border border-ink/25 text-xs leading-none dark:border-paper/30"
         aria-label="About this metric"
-        aria-expanded={open()}
+        aria-expanded={open() ? "true" : "false"}
         aria-describedby={open() ? props.id : undefined}
         onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
       >
         ?
       </button>

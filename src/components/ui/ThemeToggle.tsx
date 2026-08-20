@@ -24,7 +24,7 @@ export function ThemeToggle() {
                 "bg-accent text-paper": prefs.theme === option().id,
               },
             ]}
-            aria-pressed={prefs.theme === option().id}
+            aria-pressed={prefs.theme === option().id ? "true" : "false"}
             onClick={() => setTheme(option().id)}
           >
             {option().label}
