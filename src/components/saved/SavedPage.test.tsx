@@ -44,6 +44,15 @@ function renderSaved(
   return renderUi(() => <SavedView search={search} onLoad={onLoad} />);
 }
 
+function seed(q: ReturnType<typeof renderSaved>, name: string): void {
+  fireEvent.input(q.getByLabelText("Name for current setup"), {
+    target: { value: name },
+  });
+  flush();
+  fireEvent.click(q.getByRole("button", { name: "Save current" }));
+  flush();
+}
+
 describe("SavedPage", () => {
   it("saves the current setup and still lists it after a storage reload", () => {
     const { getByLabelText, getByRole, getByText } = renderSaved();
@@ -138,5 +147,68 @@ describe("SavedPage", () => {
     expect(loaded[0]?.stay).toBe(405);
     expect(loaded[0]?.chainring).toBe(48);
     expect(loaded[0]?.cog).toBe(16);
+  });
+
+  it("requires confirmation before deleting", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    expect(q.queryByRole("button", { name: "Delete" })).toBeNull();
+    expect(q.getByRole("button", { name: "Confirm delete" })).toBeTruthy();
+    expect(q.getByRole("button", { name: "Cancel" })).toBeTruthy();
+    expect(q.getByRole("heading", { name: "Track" })).toBeTruthy();
+    expect(saved.setups).toHaveLength(1);
+  });
+
+  it("deletes on confirm", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+    expect(q.queryByRole("heading", { name: "Track" })).toBeNull();
+    expect(saved.setups).toHaveLength(0);
+  });
+
+  it("disarms on cancel and on Escape", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.click(q.getByRole("button", { name: "Cancel" }));
+    flush();
+    expect(q.getByRole("button", { name: "Delete" })).toBeTruthy();
+
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+    fireEvent.keyDown(q.getByRole("button", { name: "Confirm delete" }), {
+      key: "Escape",
+    });
+    flush();
+    expect(q.getByRole("button", { name: "Delete" })).toBeTruthy();
+    expect(saved.setups).toHaveLength(1);
+  });
+
+  it("arms only one row at a time", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    seed(q, "Street");
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+    expect(q.queryAllByRole("button", { name: "Confirm delete" })).toHaveLength(
+      1,
+    );
+  });
+
+  it("keeps the bike name out of the visible Load label", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    expect(q.getByRole("button", { name: "Load Track" }).textContent).toBe(
+      "Load",
+    );
   });
 });
