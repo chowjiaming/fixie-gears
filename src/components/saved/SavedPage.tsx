@@ -33,6 +33,13 @@ function setupSummary(setup: SavedSetup, units: Units): string {
   ].join(" · ");
 }
 
+export function keepCurrentStay(
+  bike: CalculatorSearch,
+  stay: number,
+): CalculatorSearch {
+  return { ...bike, stay };
+}
+
 export function SavedPage() {
   const search = useSearch({ from: "/saved" });
   const go = useNavigate();
@@ -42,7 +49,7 @@ export function SavedPage() {
       onLoad={(bike) => {
         void go({
           to: "/",
-          search: { ...bike, stay: search().stay },
+          search: keepCurrentStay(bike, search().stay),
         });
       }}
     />

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  chainLength,
-  nearestEvenLinks,
-  nearestOddLinks,
-} from "./chain";
+import { chainLength, nearestEvenLinks, nearestOddLinks } from "./chain";
 
 describe("nearest parity", () => {
   it("picks the lower neighbor on a tie", () => {

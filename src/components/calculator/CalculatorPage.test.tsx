@@ -111,4 +111,84 @@ describe("CalculatorPage", () => {
     flush();
     expect(search()).not.toHaveProperty("circ");
   });
+
+  it("clears circ from search for out-of-range and non-integer commits", () => {
+    const { getByRole, search } = renderCalculator(
+      parseCalculatorSearch({ circ: 2130 }),
+    );
+    const input = getByRole("spinbutton", {
+      name: "Measured circumference",
+    });
+
+    fireEvent.change(input, { target: { value: "1000" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search()).not.toHaveProperty("circ");
+
+    fireEvent.change(input, { target: { value: "2130" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search().circ).toBe(2130);
+
+    fireEvent.change(input, { target: { value: "2501" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search()).not.toHaveProperty("circ");
+
+    fireEvent.change(input, { target: { value: "2130" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search().circ).toBe(2130);
+
+    fireEvent.change(input, { target: { value: "2130.5" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search()).not.toHaveProperty("circ");
+  });
+
+  it("sets circ when a valid taped circumference is committed", () => {
+    const { getByRole, search } = renderCalculator();
+    const input = getByRole("spinbutton", {
+      name: "Measured circumference",
+    });
+
+    fireEvent.input(input, { target: { value: "2130" } });
+    flush();
+    expect(search()).not.toHaveProperty("circ");
+
+    fireEvent.change(input, { target: { value: "2130" } });
+    fireEvent.blur(input);
+    flush();
+    expect(search().circ).toBe(2130);
+  });
+
+  it("writes clamped millimetres to stay when editing chainstay in imperial", () => {
+    const { getByRole, getAllByRole, search } = renderCalculator(
+      parseCalculatorSearch({ stay: 405 }),
+    );
+    fireEvent.click(getByRole("button", { name: "Imperial" }));
+    flush();
+
+    const stepper = getAllByRole("spinbutton", {
+      name: "Chainstay value",
+    })[0]!;
+    fireEvent.change(stepper, { target: { value: "16.1" } });
+    fireEvent.blur(stepper);
+    flush();
+
+    expect(search().stay).toBe(409);
+  });
+
+  it("shows the taped circumference tip on development and gain tooltips", () => {
+    const { getAllByRole, getByRole } = renderCalculator(
+      parseCalculatorSearch({ circ: 2130 }),
+    );
+    const tips = getAllByRole("button", { name: "About this metric" });
+    const developmentTip = tips[1]!;
+    fireEvent.click(developmentTip);
+    flush();
+    expect(getByRole("tooltip").textContent).toBe(
+      "Using a taped circumference of 2130 mm. Clear the field to return to bead-seat plus twice the tire width.",
+    );
+  });
 });

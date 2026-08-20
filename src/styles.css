@@ -21,3 +21,10 @@
     transition: none;
   }
 }
+
+/* Keep calculator inputs visible on desktop even if the mobile details was collapsed. */
+@media (min-width: 1024px) {
+  details.setup-inputs:not([open]) > *:not(summary) {
+    display: block !important;
+  }
+}

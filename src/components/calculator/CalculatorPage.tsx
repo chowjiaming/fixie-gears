@@ -6,6 +6,7 @@ import { SkidVisualizer } from "~/components/skid/SkidVisualizer";
 import { CadenceTable } from "~/components/ui/CadenceTable";
 import { MetricCard } from "~/components/ui/MetricCard";
 import { PresetChips } from "~/components/ui/PresetChips";
+import { CircumferenceInput } from "~/components/ui/CircumferenceInput";
 import { ToothInput } from "~/components/ui/ToothInput";
 import {
   ALLOWED_CRANKS_MM,
@@ -72,7 +73,7 @@ export function CalculatorView(props: {
     <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
       <aside>
         <details
-          class="rounded-lg border border-ink/10 p-3 dark:border-paper/15 lg:border-0 lg:p-0"
+          class="setup-inputs rounded-lg border border-ink/10 p-3 dark:border-paper/15 lg:border-0 lg:p-0"
           open
         >
           <summary class="cursor-pointer font-medium lg:hidden">Inputs</summary>
@@ -203,25 +204,11 @@ function SetupInputs(props: {
         unit="mm"
         onChange={(tire) => props.onPatch({ tire })}
       />
-      <label class="flex flex-col gap-1 text-sm">
-        Measured circumference
-        <input
-          type="number"
-          class="rounded border border-ink/20 bg-transparent px-2 py-1.5 dark:border-paper/20"
-          aria-label="Measured circumference"
-          placeholder="optional"
-          value={props.bike.circ ?? ""}
-          onChange={(e) => {
-            const raw = e.currentTarget.value;
-            if (raw.trim() === "") {
-              props.onPatch({ circ: undefined });
-              return;
-            }
-            const n = Number(raw);
-            if (Number.isInteger(n)) props.onPatch({ circ: n });
-          }}
-        />
-      </label>
+      <CircumferenceInput
+        label="Measured circumference"
+        value={props.bike.circ}
+        onChange={(circ) => props.onPatch({ circ })}
+      />
       <label class="flex flex-col gap-1 text-sm">
         Crank length
         <select
