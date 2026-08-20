@@ -69,6 +69,7 @@ export function SavedView(props: {
   const [status, setStatus] = createSignal<string | undefined>();
   const [error, setError] = createSignal<string | undefined>();
   let fileInput: HTMLInputElement | undefined;
+  let listRegion: HTMLDivElement | undefined;
 
   const currentConfig = () => toConfig(search());
 
@@ -108,6 +109,19 @@ export function SavedView(props: {
     setArmedId(undefined);
     flush();
     container?.querySelector("button")?.focus();
+  };
+
+  // Confirming unmounts the row that held focus, and the whole list when it was
+  // the last row, so focus goes to the surrounding region rather than to any
+  // element that may not survive the delete.
+  const confirmDelete = (setup: SavedSetup) => {
+    const name = setup.name;
+    deleteSetup(setup.id);
+    setArmedId(undefined);
+    setError(undefined);
+    setStatus(`Deleted “${name}”.`);
+    flush();
+    listRegion?.focus();
   };
 
   const onExport = () => {
@@ -210,106 +224,117 @@ export function SavedView(props: {
         )}
       </Show>
 
-      <Show
-        when={saved.setups.length > 0}
-        fallback={
-          <p class="text-sm opacity-70">No saved setups on this device.</p>
-        }
+      <div
+        ref={(element) => {
+          listRegion = element;
+        }}
+        tabindex="-1"
       >
-        <ul class="flex flex-col gap-3">
-          <For each={saved.setups} keyed={(setup) => setup.id}>
-            {(setup) => {
-              let deleteControl: HTMLSpanElement | undefined;
+        <Show
+          when={saved.setups.length > 0}
+          fallback={
+            <p class="text-sm opacity-70">No saved setups on this device.</p>
+          }
+        >
+          <ul class="flex flex-col gap-3">
+            <For each={saved.setups} keyed={(setup) => setup.id}>
+              {(setup) => {
+                let deleteControl: HTMLDivElement | undefined;
 
-              return (
-                <li class="rounded-lg border border-ink/10 p-4 dark:border-paper/15">
-                  <div class="flex flex-wrap items-start justify-between gap-2">
-                    <Show
-                      when={editingId() === setup().id}
-                      fallback={
-                        <h2 class="text-base font-medium">{setup().name}</h2>
-                      }
-                    >
-                      <input
-                        class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1 text-base dark:border-paper/20"
-                        aria-label={`Rename ${setup().name}`}
-                        value={draftName()}
-                        onInput={(e) => setDraftName(e.currentTarget.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            commitRename(setup().id);
-                          }
-                          if (e.key === "Escape") setEditingId(undefined);
-                        }}
-                        onBlur={() => commitRename(setup().id)}
-                      />
-                    </Show>
-                    <time class="text-xs opacity-60" datetime={setup().savedAt}>
-                      {new Date(setup().savedAt).toLocaleString()}
-                    </time>
-                  </div>
-                  <p class="mt-1 font-mono text-sm tabular-nums opacity-80">
-                    {setupSummary(setup(), prefs.units)}
-                  </p>
-                  <div class="mt-3 flex flex-wrap gap-2">
-                    <Button
-                      ariaLabel={`Load ${setup().name}`}
-                      onClick={() => load(setup())}
-                    >
-                      Load
-                    </Button>
-                    <Button onClick={() => startRename(setup())}>Rename</Button>
-                    <Button onClick={() => duplicateSetup(setup().id)}>
-                      Duplicate
-                    </Button>
-                    <span
-                      class="contents"
-                      ref={(element) => {
-                        deleteControl = element;
-                      }}
-                    >
+                return (
+                  <li class="rounded-lg border border-ink/10 p-4 dark:border-paper/15">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
                       <Show
-                        when={armedId() === setup().id}
+                        when={editingId() === setup().id}
                         fallback={
-                          <Button
-                            onClick={() => armDelete(setup().id, deleteControl)}
-                          >
-                            Delete
-                          </Button>
+                          <h2 class="text-base font-medium">{setup().name}</h2>
                         }
                       >
-                        <fieldset
-                          class="contents"
-                          aria-label="Delete confirmation"
-                          onKeyDown={(event) => {
-                            if (event.key === "Escape") {
-                              disarmDelete(deleteControl);
+                        <input
+                          class="focus-ring rounded border border-ink/20 bg-transparent px-2 py-1 text-base dark:border-paper/20"
+                          aria-label={`Rename ${setup().name}`}
+                          value={draftName()}
+                          onInput={(e) => setDraftName(e.currentTarget.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              commitRename(setup().id);
                             }
+                            if (e.key === "Escape") setEditingId(undefined);
                           }}
+                          onBlur={() => commitRename(setup().id)}
+                        />
+                      </Show>
+                      <time
+                        class="text-xs opacity-60"
+                        datetime={setup().savedAt}
+                      >
+                        {new Date(setup().savedAt).toLocaleString()}
+                      </time>
+                    </div>
+                    <p class="mt-1 font-mono text-sm tabular-nums opacity-80">
+                      {setupSummary(setup(), prefs.units)}
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        ariaLabel={`Load ${setup().name}`}
+                        onClick={() => load(setup())}
+                      >
+                        Load
+                      </Button>
+                      <Button onClick={() => startRename(setup())}>
+                        Rename
+                      </Button>
+                      <Button onClick={() => duplicateSetup(setup().id)}>
+                        Duplicate
+                      </Button>
+                      <div
+                        class="contents"
+                        ref={(element) => {
+                          deleteControl = element;
+                        }}
+                      >
+                        <Show
+                          when={armedId() === setup().id}
+                          fallback={
+                            <Button
+                              onClick={() =>
+                                armDelete(setup().id, deleteControl)
+                              }
+                            >
+                              Delete
+                            </Button>
+                          }
                         >
-                          <Button
-                            variant="danger"
-                            onClick={() => {
-                              deleteSetup(setup().id);
-                              setArmedId(undefined);
+                          <fieldset
+                            class="contents"
+                            aria-label="Delete confirmation"
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") {
+                                disarmDelete(deleteControl);
+                              }
                             }}
                           >
-                            Confirm delete
-                          </Button>
-                          <Button onClick={() => disarmDelete(deleteControl)}>
-                            Cancel
-                          </Button>
-                        </fieldset>
-                      </Show>
-                    </span>
-                  </div>
-                </li>
-              );
-            }}
-          </For>
-        </ul>
-      </Show>
+                            <Button
+                              variant="danger"
+                              onClick={() => confirmDelete(setup())}
+                            >
+                              Confirm delete
+                            </Button>
+                            <Button onClick={() => disarmDelete(deleteControl)}>
+                              Cancel
+                            </Button>
+                          </fieldset>
+                        </Show>
+                      </div>
+                    </div>
+                  </li>
+                );
+              }}
+            </For>
+          </ul>
+        </Show>
+      </div>
     </div>
   );
 }

@@ -343,7 +343,7 @@ export function HeatmapGrid(props: HeatmapGridProps) {
         <label class="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            class="accent-accent"
+            class="focus-ring accent-accent"
             aria-label="Dim setups with fewer than 8 skid patches"
             checked={dimFilterOn()}
             onChange={(e) =>
@@ -476,7 +476,7 @@ function MetricRadio(props: {
       <input
         type="radio"
         name="explore-metric"
-        class="accent-accent"
+        class="focus-ring accent-accent"
         value={props.metric}
         checked={props.selected === props.metric}
         onChange={() => props.onChange(props.metric)}

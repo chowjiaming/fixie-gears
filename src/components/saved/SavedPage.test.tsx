@@ -205,6 +205,49 @@ describe("SavedPage", () => {
     );
   });
 
+  it("moves focus to the list region after confirming with rows left", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    seed(q, "Street");
+    fireEvent.click(q.getAllByRole("button", { name: "Delete" })[0]!);
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    const list = q.getByRole("list");
+    expect(document.activeElement).toBe(list.parentElement);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
+  it("moves focus to the list region after confirming the last row", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    const fallback = q.getByText("No saved setups on this device.");
+    expect(document.activeElement).toBe(fallback.parentElement);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
+  it("announces the deleted setup by name", () => {
+    const q = renderSaved();
+    seed(q, "Track");
+    fireEvent.click(q.getByRole("button", { name: "Delete" }));
+    flush();
+
+    fireEvent.click(q.getByRole("button", { name: "Confirm delete" }));
+    flush();
+
+    expect(host!.querySelector("[aria-live='polite']")?.textContent).toBe(
+      "Deleted “Track”.",
+    );
+  });
+
   it("does not steal focus on initial render or when saving", () => {
     const sentinel = document.createElement("button");
     document.body.appendChild(sentinel);
