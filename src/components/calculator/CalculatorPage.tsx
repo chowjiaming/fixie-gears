@@ -1,5 +1,7 @@
 import { createMemo, For } from "solid-js";
 import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { SkidSuggestions } from "~/components/skid/SkidSuggestions";
+import { SkidVisualizer } from "~/components/skid/SkidVisualizer";
 import { CadenceTable } from "~/components/ui/CadenceTable";
 import { MetricCard } from "~/components/ui/MetricCard";
 import { PresetChips } from "~/components/ui/PresetChips";
@@ -33,7 +35,7 @@ const SKID_TIP =
 export function CalculatorPage() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
-  const { metrics } = useCurrentSetup(search);
+  const { config, metrics } = useCurrentSetup(search);
 
   const patch = (partial: Partial<CalculatorSearch>) => {
     void navigate({
@@ -104,6 +106,19 @@ export function CalculatorPage() {
             Speed at cadence
           </h2>
           <CadenceTable speeds={metrics().speeds} units={prefs.units} />
+        </div>
+
+        <div>
+          <h2 class="mb-3 text-sm font-medium uppercase tracking-wide opacity-70">
+            Skid patches
+          </h2>
+          <div class="grid gap-6 sm:grid-cols-2">
+            <SkidVisualizer config={config()} />
+            <SkidSuggestions
+              config={config()}
+              onApply={(chainring, cog) => patch({ chainring, cog })}
+            />
+          </div>
         </div>
       </section>
     </div>

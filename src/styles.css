@@ -7,3 +7,17 @@
   --color-ink: #111214;
   --color-paper: #fafaf8;
 }
+
+.skid-marker {
+  transform-box: view-box;
+  transform-origin: center;
+  transition:
+    transform 200ms ease,
+    opacity 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skid-marker {
+    transition: none;
+  }
+}
