@@ -53,6 +53,22 @@ describe("CompareColumnHeader", () => {
     expect(onChange).toHaveBeenCalledWith({ cog: 18 });
   });
 
+  it("has a measured circumference field and no chainstay", () => {
+    const { getByRole, queryByRole } = renderUi(() => (
+      <CompareColumnHeader
+        index={1}
+        bike={parseCalculatorSearch({})}
+        removable={false}
+        onChange={() => undefined}
+        onRemove={() => undefined}
+      />
+    ));
+    expect(
+      getByRole("spinbutton", { name: "Measured circumference" }),
+    ).toBeTruthy();
+    expect(queryByRole("spinbutton", { name: "Chainstay value" })).toBeNull();
+  });
+
   it("omits remove on column 1 and fires it on extras", () => {
     const onRemove = vi.fn();
     const locked = renderUi(() => (

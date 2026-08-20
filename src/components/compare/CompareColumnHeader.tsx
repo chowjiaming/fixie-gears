@@ -78,6 +78,25 @@ export function CompareColumnHeader(props: CompareColumnHeaderProps) {
         onChange={(tire) => props.onChange({ tire })}
       />
       <label class="flex flex-col gap-1 text-sm">
+        Circ
+        <input
+          type="number"
+          class={selectClass}
+          aria-label="Measured circumference"
+          placeholder="optional"
+          value={props.bike.circ ?? ""}
+          onChange={(e) => {
+            const raw = e.currentTarget.value;
+            if (raw.trim() === "") {
+              props.onChange({ circ: undefined });
+              return;
+            }
+            const n = Number(raw);
+            if (Number.isInteger(n)) props.onChange({ circ: n });
+          }}
+        />
+      </label>
+      <label class="flex flex-col gap-1 text-sm">
         Crank
         <select
           class={selectClass}

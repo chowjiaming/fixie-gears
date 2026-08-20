@@ -1,6 +1,7 @@
 import { Show, createMemo, createSignal } from "solid-js";
 import { CompareTable } from "~/components/compare/CompareTable";
 import {
+  applySearchPatch,
   buildCompareColumns,
   compactCompareExtras,
   extrasAfterAdd,
@@ -60,12 +61,12 @@ export function CompareView(props: CompareViewProps) {
 
   const onChange = (slot: CompareSlot, partial: Partial<CalculatorSearch>) => {
     if (slot === "c1") {
-      commit({ ...bike(), ...partial }, extras());
+      commit(applySearchPatch(bike(), partial), extras());
       return;
     }
     const col = columns().find((c) => c.slot === slot);
     if (!col) return;
-    const updated = { ...col.bike, ...partial };
+    const updated = applySearchPatch(col.bike, partial);
     commit(bike(), {
       ...extras(),
       [slot]: formatCompareTuple(toConfig(updated)),
