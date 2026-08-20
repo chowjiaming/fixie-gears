@@ -33,6 +33,8 @@ function bikeFromSearch(search: CalculatorSearch): CalculatorSearch {
     tire: search.tire,
     crank: search.crank,
     ambi: search.ambi,
+    stay: search.stay,
+    ...(search.circ !== undefined ? { circ: search.circ } : {}),
   };
 }
 
