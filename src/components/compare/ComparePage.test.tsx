@@ -2,8 +2,14 @@ import { fireEvent, getQueriesForElement } from "@testing-library/dom";
 import { render as solidRender } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
 import { createSignal, flush } from "solid-js";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCalculatorSearch, seedCompareExtras } from "~/lib/search";
+import {
+  compareColumnName,
+  reloadSavedFromStorage,
+  SAVED_STORAGE_KEY,
+  saved,
+} from "~/lib/state/saved-store";
 import { CompareView, type CompareSearch } from "./CompareView";
 
 let dispose: (() => void) | undefined;
@@ -14,6 +20,8 @@ afterEach(() => {
   dispose = undefined;
   host?.remove();
   host = undefined;
+  localStorage.removeItem(SAVED_STORAGE_KEY);
+  reloadSavedFromStorage();
 });
 
 function renderUi(ui: () => JSX.Element) {
@@ -95,5 +103,24 @@ describe("CompareView", () => {
     expect(queryByText(/Setup 4/)).toBeNull();
     expect(search().c2).toBe("46,18,700c,25,170,0");
     expect(search().c3).toBe("46,16,700c,25,170,0");
+  });
+
+  it("saves each column without a second prompt", () => {
+    const prompt = vi.spyOn(window, "prompt");
+    const bike = parseCalculatorSearch({ chainring: 46, cog: 17 });
+    const { getByRole } = renderCompare({
+      ...bike,
+      ...seedCompareExtras(bike, {}),
+    });
+
+    fireEvent.click(getByRole("button", { name: "Save all" }));
+
+    expect(prompt).not.toHaveBeenCalled();
+    expect(saved.setups.map((s) => s.name)).toEqual([
+      compareColumnName(1, 46, 17),
+      compareColumnName(2, 46, 18),
+      compareColumnName(3, 46, 16),
+    ]);
+    prompt.mockRestore();
   });
 });

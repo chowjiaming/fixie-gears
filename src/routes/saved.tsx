@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/solid-router";
+import { SavedPage } from "~/components/saved/SavedPage";
 import { parseCalculatorSearch } from "~/lib/search";
 
 export const Route = createFileRoute("/saved")({
@@ -6,7 +7,3 @@ export const Route = createFileRoute("/saved")({
     parseCalculatorSearch(search),
   component: SavedPage,
 });
-
-function SavedPage() {
-  return <h1>Saved</h1>;
-}

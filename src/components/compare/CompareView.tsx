@@ -1,4 +1,4 @@
-import { Show, createMemo } from "solid-js";
+import { Show, createMemo, createSignal } from "solid-js";
 import { CompareTable } from "~/components/compare/CompareTable";
 import {
   buildCompareColumns,
@@ -14,6 +14,7 @@ import {
   type CompareSlot,
 } from "~/lib/search";
 import type { Units } from "~/lib/state/prefs-store";
+import { saveCompareColumns } from "~/lib/state/saved-store";
 
 export type CompareSearch = CalculatorSearch & CompareExtras;
 
@@ -36,6 +37,7 @@ function bikeFromSearch(search: CalculatorSearch): CalculatorSearch {
 }
 
 export function CompareView(props: CompareViewProps) {
+  const [saveAllStatus, setSaveAllStatus] = createSignal<string | undefined>();
   const bike = createMemo(() => bikeFromSearch(props.search));
   const extras = createMemo(() =>
     compactCompareExtras({
@@ -76,23 +78,45 @@ export function CompareView(props: CompareViewProps) {
     commit(bike(), extrasAfterAdd(bike(), extras()));
   };
 
+  const onSaveAll = () => {
+    const cols = columns();
+    saveCompareColumns(cols.map((c) => c.bike));
+    setSaveAllStatus(`Saved ${cols.length} setups.`);
+  };
+
   return (
     <div class="mx-auto flex max-w-6xl flex-col gap-4">
       <div class="flex flex-wrap items-baseline justify-between gap-3">
         <h1 class="text-xl font-semibold">Compare</h1>
-        <Show when={columns().length < 4}>
+        <div class="flex flex-wrap items-center gap-2">
           <button
             type="button"
             class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
-            onClick={onAdd}
+            onClick={onSaveAll}
           >
-            Add column
+            Save all
           </button>
-        </Show>
+          <Show when={columns().length < 4}>
+            <button
+              type="button"
+              class="rounded border border-ink/20 px-3 py-1.5 text-sm hover:border-accent dark:border-paper/20"
+              onClick={onAdd}
+            >
+              Add column
+            </button>
+          </Show>
+        </div>
       </div>
       <p class="text-sm opacity-70">
         Column 1 is your current setup. Editing it updates the calculator too.
       </p>
+      <Show when={saveAllStatus()}>
+        {(message) => (
+          <p class="text-sm opacity-70" aria-live="polite">
+            {message()}
+          </p>
+        )}
+      </Show>
       <CompareTable
         columns={columns()}
         units={props.units}

@@ -4,6 +4,7 @@ import {
   Outlet,
   useSearch,
 } from "@tanstack/solid-router";
+import { CopyLinkButton } from "~/components/ui/CopyLinkButton";
 import { ThemeToggle } from "~/components/ui/ThemeToggle";
 import { UnitToggle } from "~/components/ui/UnitToggle";
 import {
@@ -66,6 +67,7 @@ function RootLayout() {
         <div class="ml-auto flex flex-wrap items-center gap-3">
           <UnitToggle />
           <ThemeToggle />
+          <CopyLinkButton />
         </div>
       </header>
       <main class="p-4">
